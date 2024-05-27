@@ -1,7 +1,28 @@
 
 # Notes from Chaptr 1:&nbsp;&nbsp;A Crash Course in C++ and the Standard Library
 
-Note: this is some notes from the chapter, not a comprehensive summary of it
+Note: this is some notes from the chapter, not a comprehensive guide of it
+
+- [1- Headers, Imports, and I/O Streams](#1--headers-imports-and-i/o-streams)
+- [2- Namespaces](#2--namespaces)
+- [3- Literals](#3--literals)
+- [4- Variables](#4--variables)
+- [4- Enumerations](#4--enumerations)
+- [5- Structs](#5--structs)
+- [6- Conditional Statements and Logical Operators](#6--conditional-statements-and-logical-operators)
+- [7- Functions](#7--functions)
+- [8- Attributes](#8--attributes)
+- [9- C-Style Array, std::array, and vector](#9--c-style-array-std::array-and-vector)
+- [10- std::pair](#10--std::pair)
+- [11-std::optional and value_or](#11-std::optional-and-value_or)
+- [12-std::tuple](#12-std::tuple)
+- [13-Structured Bindings](#13-structured-bindings)
+- [14- Loops](#14--loops)
+- [15- Initializer Lists](#15--initializer-lists)
+- [16- C++ as an Object-Oriented Language](#16--c++-as-an-object-oriented-language)
+- [17- Scope Resolution](#17--scope-resolution)
+- [18- Uniform Initialization](#18--uniform-initialization)
+- [19- Designated Initializers](#19--designated-initializers)
 
 **C vs C++**
 
@@ -9,7 +30,7 @@ The C++ language is often viewed as a “better C” or a “superset of C.” I
 
 **No**, if you are an experienced C programmer. The two languages certainly have their differences, though. As evidence, **the C23 standard specification document is a little fewer than 800 pages** in size, while the **C++23 standard specification document is more than 2,000 pages.** So, if you’re a C programmer but also if you are coming from other languages such as Java, C#, Python, and so on, be on the lookout for new or unfamiliar syntax!
 
-  ## 1- Headers, Imports, and I/O Streams
+### 1- Headers, Imports, and I/O Streams
 
 the  **Hello World!** program
 ```c++
