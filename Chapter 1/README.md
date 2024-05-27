@@ -2,8 +2,7 @@
 # Notes from Chaptr 1:&nbsp;&nbsp;A Crash Course in C++ and the Standard Library
 
 Note: this is some notes from the chapter, not a comprehensive guide of it
-
-- [1- Headers, Imports, and I/O Streams](#1--headers-imports-and-i/o-streams)
+- [1- Headers, Imports, and I/O Streams](#1--headers-imports-and-io-streams)
 - [2- Namespaces](#2--namespaces)
 - [3- Literals](#3--literals)
 - [4- Variables](#4--variables)
@@ -12,10 +11,10 @@ Note: this is some notes from the chapter, not a comprehensive guide of it
 - [6- Conditional Statements and Logical Operators](#6--conditional-statements-and-logical-operators)
 - [7- Functions](#7--functions)
 - [8- Attributes](#8--attributes)
-- [9- C-Style Array, std::array, and vector](#9--c-style-array-std::array-and-vector)
-- [10- std::pair](#10--std::pair)
-- [11-std::optional and value_or](#11-std::optional-and-value_or)
-- [12-std::tuple](#12-std::tuple)
+- [9- C-Style Array, std::array, and vector](#9--c-style-array-stdarray-and-vector)
+- [10- std::pair](#10--stdpair)
+- [11-std::optional and value_or](#11-stdoptional-and-value_or)
+- [12-std::tuple](#12-stdtuple)
 - [13-Structured Bindings](#13-structured-bindings)
 - [14- Loops](#14--loops)
 - [15- Initializer Lists](#15--initializer-lists)
