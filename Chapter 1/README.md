@@ -1,3 +1,4 @@
+
 # Notes from Chaptr 1:&nbsp;&nbsp;A Crash Course in C++ and the Standard Library
 
 Note: this is some notes from the chapter, not a comprehensive summary of it
@@ -53,9 +54,9 @@ import std;
 
 - **Preprocessor** : First, the code is run through a preprocessor, which recognizes meta-information about the code and handles preprocessor directives, such as `#include` directives. A source file in which all preprocessor directives are handled is called a translation unit
 
-- **Translation unit** : Next, all translation units are independently compiled, or translated, into machine-readable object files in which references to functions and so on are not yet defined.
+- **Translation unit**: Next, all translation units are independently compiled, or translated, into machine-readable object files in which references to functions and so on are not yet defined.
 
-- **Linker** : Resolving those references is done in the final phase by the linker, which links all object files together into the final executable
+- **Linker**: Resolving those references is done in the final phase by the linker, which links all object files together into the final executable
 
   
 
@@ -144,7 +145,7 @@ to print errors use `cerr`, but what is the difference between `cout`, `cerr`, a
 
 * **Un-buffered standard error stream (cerr):**  `cerr`  is the standard error stream that is used to output the errors. This is also an instance of the  `ostream`  class. As  `cerr`  is  **un-buffered**  so it is used when we need to display the error message immediately. It does not have any buffer to store the error message and display it later.
 
-* **Buffered standard error stream (clog):**  This is also an instance of  `ostream`  class and is used to display errors but unlike  `cerr`  the error is first inserted into a  **buffer**  and is stored in the buffer until it is not fully filled.
+* **Buffered standard error stream (clog):**  This is also an instance of the `ostream`  class and is used to display errors but unlike  `cerr`  the error is first inserted into a  **buffer**  and is stored in the buffer until it is not fully filled.
 
 ```c++
 int main(){
@@ -245,7 +246,7 @@ PS F:\Chapter 1> (g++ .\2.3main_inside_namespace.cpp)
 F:/mingew64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/13.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: F:/mingew64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/13.2.0/../../../../x86_64-w64-mingw32/lib/../lib/libmingw32.a(lib64_libmingw32_a-crtexewin.o):crtexewin.c:(.text+0x130): undefined reference to `WinMain'
 collect2.exe: error: ld returned 1 exit status
 ```
-so the main method should be defined inside the global namespace, and defining the main function inside a namespace will not be considered as program entry point.
+so the main method should be defined inside the global namespace, and defining the main function inside a namespace will not be considered a program entry point.
 ```cpp
 #include <iostream>
 namespace n1{
@@ -578,7 +579,7 @@ Starting with C++23, you can use `std::to_underlying()`. For example:
 
 By default, the underlying type of an enumerator is an integer, but this can be changed as follows:
 ```cpp
-num class PieceType : unsigned long
+num class PieceType: unsigned long
 {
 King = 1,
 Queen,
@@ -894,3 +895,1024 @@ int addNumbers(int number1, int number2)
 	return number1 + number2;  
 }
 ```
+
+### 8- Attributes
+**Attributes** are one of the key features of modern C++ which allows the programmer to **specify additional information to the compiler to enforce constraints(conditions), optimise certain pieces of code, suppress warnings or do some specific code generation**. Attributes are standardized in C++ since C++11, is standardized by using the double square brackets syntax [[attribute]].
+*[recommended video for some attributes](https://www.youtube.com/watch?v=BpulWncdn9Y)*
+
+**1- [[fallthrough]]**
+recalling switch-case statement, 
+```cpp
+int main(){
+    int x {10} ;
+    switch (x)
+    {
+    case 10:
+        std::cout << "case 10\n" ;
+    case 15:
+         std::cout << "case 15\n" ;
+         break ;
+    case 20:
+         std::cout << "case 20\n" ;
+    
+    default:
+        break;
+    }
+}
+```
+the output should be `case 10` but it is
+```
+case 10
+case 15
+```
+this issue is because there isn't a break statement at the end of case 10, this issue is called fallthrough. so a compiler returns a warning message at this line.
+when the developer wants to suppress this warning (i.e. this is the required behavior), a `[[fallthrough]]` attribute should be used.
+
+```c++
+int main(){
+    int x {10} ;
+    switch (x)
+    {
+    case 10:
+        std::cout << "case 10\n" ;
+        [[fallthrough]];
+    case 15:
+         std::cout << "case 15\n" ;
+         break ;
+    case 20:
+         std::cout << "case 20\n" ;
+    default:
+        break;
+    }
+}
+```
+
+**2- [[nodiscard]]**
+when a developer designs a function and wants to enforce to use of its return value in case of being called (i.e. to not discard it) or make the compiler issue a warning, he should use the `[[nodiscard]]` attribute.
+
+```c++
+[[nodiscard]] int func() { return 42; }  
+int main()  
+{  
+func();  
+}
+```
+The compiler issues a warning similar to the following:  
+> warning C4834: discarding return value of a function with 'nodiscard' attribute
+
+it may be used with functions that return an error status code.
+
+**3- [[maybe_unused]]**
+to suppress the warning of a compiler on unused variables, for example
+```cpp
+int x = 10 ;
+int main(){
+	return 0 ;
+}
+```
+`warning C4100: 'x': unreferenced formal parameter`
+
+by using `[[maybe_unused]]` before `int x = 10`, the warning will disappered.
+```cpp
+[[maybe_unused]] int x = 10 ;
+int main(){
+	return 0 ;
+}
+```
+**4- [[noreturn]]**
+every function when it finishes, returns the control to the calling function, but some functions don't return the control to the calling function, such as a function that has an infinite loop, a function that throws an exception, or causes some kind of termination.
+
+for example:
+```cpp
+void noReturnControlToTheCaller(){
+    while(1){}
+}
+int func(int p){
+    if (p  < 0){
+        return 10 ;
+    }
+    noReturnControlToTheCaller();
+} //warning
+int main(){
+    return 0 ;
+}
+```
+`non-void function does not return a value in all control paths [-Wreturn-type]`
+the compiler issues a warning since it expects that func may reach its end (i.e. after  ` noReturnControlToTheCaller();` ) and didn't return a value, although it will never pass this line (`noReturnControlToTheCaller();`), since calling noReturnControlToTheCaller will never return the control to `func`. to suppress this warning use `[[noreturn]]` before `void noReturnControlToTheCaller(){`
+
+```cpp
+[[noreturn]] void noReturnControlToTheCaller(){
+    while(1){}
+}
+
+int func(int p){
+    if (p  < 0){
+        return 10 ;
+    }
+    noReturnControlToTheCaller();
+}
+int main(){
+    return 0 ;
+}
+```
+the warning is suppressed.
+
+**5- [[deprecated]]**
+if a developer uses APIs from libraries or a framework, the developers of these libraries may mention that a function(API) will be removed in the next update of this library, so they want to warn the developer from using this function. it is done by using the attribute `[[deprecated]]`.
+for example:
+```cpp
+//math.cpp
+int add(int a, int b){ return a + b ; } 
+int add_complex(int a, int b){ return a + b ; } 
+```
+
+if a developer developed a library for math, and the addition was limited to real numbers only, in the new update the addition is expanded to support complex numbers and it should be standardized. the developer can't remove the old function of add **to not violate the backward compatibility of the code in case a developer that uses the library updates it**, instead he will force the compiler to issue a warning to him to not use this function as it will be removed in the next updates. this is done by using `[[deprecated]]` as follows:
+```cpp
+//math.cpp
+[[deprecated("this function will be removed use add_complex instead ")]]int add(int a, int b){ return a + b ; } 
+int add_complex(int a, int b){ return a + b ; } 
+```
+or to show a deprecation warning  without any further information:
+```cpp
+//math.cpp
+[[deprecated]]int add(int a, int b){ return a + b ; } 
+int add_complex(int a, int b){ return a + b ; } 
+```
+
+**6- [[likely]] and [[unlikely]]**
+to force the compiler to optimize a certain piece of code that is more likely to be executed we use `[[likely]]` attribute, and the same for branches in which more unlikely to be executed.
+These attributes can, for example, be used to mark branches of if and switch statements according to how likely it is that a branch will be taken. However, these attributes are rarely required. Compilers and hardware these days have powerful branch predictions to figure it out themselves, but in certain cases, such as performance-critical code, you might have to help the compiler.  
+The syntax is as follows:  
+```cpp
+int value { /* ... */ };  
+if (value > 11) [[unlikely]] { /* Do something ... */ }  
+else { /* Do something else ... */ }  
+switch (value)  
+{  
+[[likely]] case 1:  
+// Do something ...  
+break;  
+case 2:  
+// Do something ...  
+break;  
+[[unlikely]] case 12:  
+// Do something ...  
+break;  
+}
+```
+
+**7- [[assume]]**
+this attribute is introduced in C++23.
+```cpp
+double divide(int num, int d){
+	if (d != 0 ){
+		return num/d ;
+	}else{
+		return num; //error
+	}
+}
+```
+to optimize the code to remove the else branch, use the `[[assume]]` keyword to assume that `d` will never equal to `0`.
+```cpp
+double divide(int num, int d){
+	[[assume(d != 0)]];  
+	if (d != 0 ){
+		return num/d ;
+	}
+} 
+```
+
+another example:
+
+an example, let’s look at the following function:  
+```cpp
+int divideBy32(int x)  
+{  
+return x / 32;  
+}  
+```
+The function accepts a signed integer, so the compiler has to produce code to make sure the division works for both positive and negative numbers. If you are sure that x will never be negative, and for  some reason, you cannot make x of type unsigned, you can add an assumption as follows:  
+```cpp
+int divideBy32(int x)  
+{  
+[[assume(x >= 0)]];  
+return x / 32;  
+}  
+```
+With this assumption in place, the compiler can omit any code to handle negative numbers and optimize the division into a single instruction, a simple right shift of five bits.
+
+[more](https://www.geeksforgeeks.org/attributes-in-c/)
+
+### 9- C-Style Array, std::array, and vector 
+This section briefly explains C-style arrays, as you will encounter them  
+in legacy code. However, in C++, it is best to avoid C-style arrays and instead use  
+Standard Library functionality, such as std::array in case of fixed size and vector in case of dynamic size.
+
+**Legacy  C-Style Array**
+
+to initialize an array:
+```cpp
+int myArray[3];  
+myArray[0] = 0;  
+myArray[1] = 0;  
+myArray[2] = 0;
+```
+or set values via a loop.
+
+an alternative method to initially initialize all elements to 0 is by doing the following:
+```cpp
+int myArray[3] = { 0 };
+//or
+int myArray[3] = {  }; //{} init with 0 by default
+//or
+int myArray[3] {}
+//or to init with values other than 0
+int myArray[3] {1,9,8}
+//or
+int myArray[] {1,9,0,8}
+//or 
+int myArray[5] {1} //{1. 0,0,0,0}
+```
+
+**size of array**
+by using `std::size` defined in `<array>`
+`std::size_t arraySize { std::size(myArray) };`
+
+or by using the sizeof operator which returns the size of all elements of the array in bytes and divides it by the size of the first element to get the count.
+```cpp
+std::size_t arraySize { sizeof(myArray) / sizeof(myArray[0]) };
+```
+
+**std::array**
+a `std::array` is a wrapper around the old C-Style array. it is defined in `<array>`.
+the advantages of using std::arrays compared to C-style arrays are:
+
+ - They always know their own size
+ - They are not automatically cast to a pointer to avoid certain types of bugs
+ - They have iterators to easily loop over the elements
+
+`array<int, 3> arr { 1, 9, 8 };`
+
+
+you can notice an angular bracket after array `<int, 3>`, the first parameter is the datatype of elements of the array and the second is the length of the array `<datatype, length>`, this angular brackets and the arguments passed between it is called class template arguments for class, a class template makes the code generic and will be discussed in detail further.
+
+also, C++ can deduce the type of the elements without explicitly specifying it this is called class template argument deduction (CTAD) and will be discussed with `templates`.
+
+```cpp
+array arr { 9, 8, 7 };
+```
+
+type deduction should be done in initialization only.
+
+for using a dynamic size array use `vector`
+
+ 
+**vector**
+declared in <vector>, a vector class replaces the concept of C-style arrays with a much more flexible and safer mechanism. , declared in <vector>, is an example of such a container. The vector class replaces the concept of C-style arrays with a much more flexible and safer mechanism.
+```c++
+// Create a vector of integers.
+vector<int> myVector { 11, 22 };
+// Add some more integers to the vector using push_back().
+myVector.push_back(33);
+myVector.push_back(44);
+// Access elements.
+println("1st element: {}", myVector[0]);
+```
+same as std::array, vector supports CTAD so a vector can be defined as follows:
+```c++
+vector myVector { 11, 22 };
+```
+
+### 10- std::pair
+as its name suggests, pair stores two values with different types, defined in \<utility>.
+```cpp
+#include  <utility>
+int main(){
+	std::pair<double, int>  p{ 1.8, 9 };
+}
+```
+to access pair values use `.first` and `.second`
+```cpp
+#include<utility>
+#include<iostream>
+
+int main(){
+    std::pair<double,int> p  {1.8, 9};
+    //or
+    //p.first = 1.8;
+    //p.second = 9;
+    std::cout<<p.first<<std::endl;
+    std::cout<<p.second<<std::endl;
+    return 0;
+}
+```
+```bash
+1.8
+9
+```
+pair also supports CTAD, so you can define myPair as follows:  
+```cpp
+#include<utility>
+
+int main(){
+    std::pair p  {1.8, 9};
+}
+```
+**NOTE** *While you could write a function returning an std::pair, it is recommended to write a small struct or class containing the two values and return that from the function. The downside of returning a pair is that **client code must be used first and second to access the two values. By returning a proper struct or class, you can give more meaningful names to the two values**.*
+
+### 11-std::optional and value_or
+std::optional, defined in <optional>, hold a value of a specific type, or nothing. 
+optional can be used in :
+ - to make a parameter of a function optional 
+ - return a from a function or return error, 
+returning an optional value from a function removes the need to return “special” values from functions such as nullptr, -1,  EOF, and so on. It also removes the need to write the function as returning a Boolean, representing success or failure.
+The optional type is a class template, so you have to specify the actual type that you need between angle brackets, as in optional<int>. This syntax is similar to how you specify the type stored in a vector, for example, vector<int>.
+```cpp
+std::optional<int> getValue(bool success){
+    if (success){
+        return 181;
+    }
+    return std::nullopt; // or {}
+
+}
+```
+to get the value from `std::optional`use `.value()` or with the dereferencing operator `*`.
+
+```cpp
+int main(){
+    std::optional<int> withValue {getValue(true)};
+    std::optional<int> withoutValue {getValue(false)};
+
+    std::cout << "access value with method 1: "<< withValue.value()  << " \n";
+    std::cout << "access value with method 2: "<< *withValue  << " \n";
+}
+```
+```bash
+access value with method 1: 181 
+access value with method 2: 181
+```
+  
+
+ to determine whether it has value or not use `has_value()` member function, or use the optional in an if statement.
+```cpp
+int main(){
+    std::optional<int> withValue {getValue(true)};
+    std::optional<int> withoutValue {getValue(false)};
+    if (withValue){
+         std::cout << "access value with method 1: "<< withValue.value()  << " \n";
+        std::cout << "access value with method 2: "<< *withValue  << " \n";
+    }
+    if (withValue.has_value()) {
+         std::cout << "access value with method 1: "<< withValue.value()  << " \n";
+         std::cout << "access value with method 2: "<< *withValue  << " \n";
+    }
+   
+   if (withoutValue){
+         std::cout << "access value with method 1: "<< withoutValue.value()  << " \n";
+        std::cout << "access value with method 2: "<< *withoutValue  << " \n";
+    }
+    if (withoutValue.has_value()) {
+         std::cout << "access value with method 1: "<< withoutValue.value()  << " \n";
+         std::cout << "access value with method 2: "<< *withoutValue  << " \n";
+    }
+}
+```
+```
+access value with method 1: 181 
+access value with method 2: 181
+access value with method 1: 181
+access value with method 2: 181
+```
+**handling empty values**
+If you call `value()` on an empty optional, a `std::bad_optional_access` exception is thrown.  Exceptions are introduced later in this readme. to handle these issues without using `.has_value()` or ` if (withoutValue)` value_or() can be used to return either the value of an optional or another value when the optional is empty:
+
+```cpp
+std::cout << "value is "<< withoutValue.value_or(-1)  << "\n";
+
+```
+
+You cannot store a reference (discussed later in this readme) in an optional, so optional<T&> does
+not work. Instead, you can store a pointer in an optional.
+
+### 12-std::tuple
+A tuple is an object that can hold several elements. The elements can be of different data types. The elements of tuples are initialized as arguments in the order in which they will be accessed. std::pair can only have two values - not zero, one, three, or more. TWO values. A tuple, however, has almost no semantic limitation on the number of values. An std::pair, therefore, is a more accurate, type-safe type to use if you actually want to specify a pair of values.
+
+**to set values for a tuple use `make_tuple`, or `()` as following:**
+
+```cpp
+#include <tuple>
+#include <iostream>
+int main(){
+    std::tuple<int, float, char> t ;
+    t = std::make_tuple(1, 8.9, 'c');
+}
+```
+or
+
+```cpp
+#include <tuple>
+#include <iostream>
+int main(){
+    std::tuple<int, float, char> t(1, 8.9, 'c');
+}
+```
+**to get value from tuple:**
+
+use  get\<index>(tuple_name)
+```cpp
+int main(){
+    std::tuple<int, float, char> t ;
+    t = std::make_tuple(1, 8.9, 'c');
+    std::cout << std::get<0>(t) << std::endl;
+    std::cout << std::get<1>(t) << std::endl;
+    std::cout << std::get<2>(t) << std::endl;
+    return 0;
+}
+```
+```
+1
+8.9
+c
+```
+
+[more](https://www.geeksforgeeks.org/tuples-in-c/)
+
+### 13-Structured Bindings
+A structured binding allows you to declare multiple variables that are initialized with elements from a
+data structure such as an array, struct, or pair.
+
+**from array**
+```cpp
+#include <array>
+#include <iostream>
+
+int main(){
+    //1- bind from array
+    std::array vals {1,2,3};
+
+    //should be defined with the keyword auto
+    auto [x1, x2, x3] {vals};
+    //or
+    auto [y1, y2, y3]  = vals;
+
+    std::cout << x1 << " " << x2 << " " << x3 << "\n"
+
+}
+```
+**some note**:
+*  you have to use the auto keyword for structured bindings, i.e., you cannot, for example, specify int instead of auto
+
+* The number of variables declared with the structured binding has to match the number of values in the expression on the right
+
+```cpp
+int main(){
+    auto [z1, z2] {vals}; //error
+    int [z1, z2] {vals}; //error
+}
+```
+
+**from structs**
+Structured bindings also work with structs if all non-static members are public.
+
+```cpp
+struct s {
+    int a, b, c ;
+};
+
+int main(){
+    
+    s s1 {1,2,3};
+    auto [a1, a2, a3] {s1};
+    std::cout << a1 << " " << a2 << " " << a3 << "\n";
+    return 0;
+}
+```
+
+**from tuples**
+```cpp
+int main(){
+    std::tuple t1 {1,2,3};
+    auto [b1, b2, b3] {t1};
+    std::cout << b1 << " " << b2 << " " << b3 << "\n";
+    return 0;
+}    
+```
+
+**from pair**
+```cpp
+int main(){
+    std::pair p1 {1,2};
+    auto [c1, c2] {p1};
+    std::cout << c1 << " " << c2 << "\n";
+}
+```
+### 14- Loops
+in the book `while`, `do-while`, and `for` loops are discussed, this readme is not a comprehensive guide, so some points are shown for this section **(Loops)**.
+
+**continue vs break**
+
+The keyword **break** can be used within a loop to immediately get out of the loop and resume execution of the program starting at the line of code following the loop.
+
+The keyword **continue** can be used to return to the top of the loop and reevaluate the while expression. However, using continue
+in loops is often considered **poor style because it causes the execution of a program to jump around somewhat haphazardly**, so use it sparingly.
+
+**The Range-Based for Loop**
+
+The range-based for loop allows  easy iteration over elements
+of a container. This type of loop works for 
+* C-style arrays
+* Initializer lists (discussed later in the next section) 
+* Any type that supports begin() and end() functions returning iterators (discussed later)
+
+The following example first defines an array of four integers. The range-based for loop then iterates over a copy of every element in this array and prints out each value. To iterate over the elements themselves without making copies.
+
+```cpp
+array arr { 1, 2, 3, 4 };
+for (int i : arr) { cout<<i<<"\n"; }
+```
+
+### 15- Initializer Lists
+every function accepts a defined number of arguments, but if a function requires a variable number of parameters it requires another method. which is **Initializer Lists**.
+
+Initializer lists are defined in \<initializer_list> and make it easy to write functions that can accept a variable number of arguments. The `std::initializer_list` type is a class template, and so it requires you to specify the type of elements in the list between angle brackets, similar to how you specify the type of elements stored in a vector. The following example shows how to use an initializer list:
+
+```cpp
+#include <iostream>
+int sum(std::initializer_list<int> values)
+{
+    int total { 0 };
+    for (int value : values) {
+    total += value;
+    }
+    return total;
+}
+```
+
+This function can be used as follows:
+```cpp
+int a { sum({ 1, 2, 3 }) };
+int b { sum({ 10, 20, 30, 40, 50, 60 }) };
+```
+Initializer lists are type-safe. All elements in such a list must be of the same type. For the sum() function shown here, all elements of the initializer list must be integers. Trying to call it with a double, as shown next, results in a compilation error or warning stating that converting from double to int
+requires narrowing.
+
+```cpp
+int c { sum({ 1, 2, 3.0 }) };
+```
+
+### 16- C++ as an Object-Oriented Language
+If you are a C programmer, you may have viewed the features covered so far in this chapter as convenient additions to the C language. As the name C++ implies, in many ways the language is just
+a “better C.” There is one major point that this view overlooks: unlike C, C++ is an object-oriented language. Object-oriented programming (OOP) is a different, arguably more natural, way to write code. 
+OOP is a big interesting topic with theories, concepts, and best practices independent of a programming language (i.e. the concepts can be applied to any programming language that supports OOP). hence it can't be covered in just a section of a summary of a chapter, but it will be covered further in another chapter (Chapter 5, “Designing with
+Classes,”  in the book).
+this section is intended to show basic C++ object syntax if you already know the theory of OOP.
+
+**Defining Classes**
+
+A class defines the characteristics of an object. In modern C++, classes are usually defined and exported from
+a module interface file (.cppm), while their definitions can either be directly in the same module interface file or in a corresponding module implementation file (.cpp). or in defined in a header file and implemented in .cpp files.
+A basic class definition for an airline ticket class is shown in the following example. The class can calculate the price of the ticket based on the number of miles on the flight and whether the customer is
+a member of the Elite Super Rewards Program.
+
+The definition begins by declaring the class name after the keyword `class`. 
+```cpp
+class AirlineTicket {
+
+}
+```
+between the set of curly braces, the data members
+(properties/variables) of the class and its member functions (behaviors) are declared. Each data member and
+member function is associated with a particular access level:
+* Public
+
+     Public members can be accessed from outside the class
+* Protected  
+
+    Members that are protected can be accessed by derived classes,  derived classes explained in detail further in the context of inheritance
+* Private
+
+     Private members cannot be accessed from anywhere outside the class
+
+```cpp
+class AirlineTicket
+{
+public:
+
+private:
+
+};
+```
+
+It’s recommended to make all your data members private,
+and if needed, to give access to them with public or protected getters to retrieve data from an object and public or protected setters to set data for an object. **This way, you can easily change the
+representation of your data while keeping the public/protected interface the same.**
+
+Remember, on writing a module interface file, don’t forget to use an export module declaration (for C++ 20) to specify which module you are writing, and don’t forget to explicitly export the types you want to
+make available to users of your module.
+
+```cpp
+ class AirlineTicket
+{
+public:
+    AirlineTicket(); //constructor
+    ~AirlineTicket(); //destructor
+    double calculatePriceInDollars();
+    std::string getPassengerName();
+    void setPassengerName(std::string name);
+    int getNumberOfMiles();
+    void setNumberOfMiles(int miles);
+    bool hasEliteSuperRewardsStatus();
+    void setHasEliteSuperRewardsStatus(bool status);
+private:
+    std::string m_passengerName;
+    int m_numberOfMiles;
+    bool m_hasEliteSuperRewardsStatus;
+};
+```
+
+it is noticed that the convention to prefix each data member of a class with a lowercase m followed by an underscore, such as m_passengerName is followed. 
+
+**Constructor and Destructor**
+
+The member function that has the same name as the class with no return type is a constructor. It is automatically called when an object of the class is created.
+
+The member function with a tilde (~) character followed by the class name is a destructor. It is automatically called when an object is destroyed.
+
+```cpp
+//oop.h
+ class AirlineTicket
+{
+public:
+    AirlineTicket(); //constructor
+    ~AirlineTicket(); //destructor
+...
+```
+
+**Initialize members in constructors**
+c++ provides three methods:
+* implement inside the class constructor in the same file
+
+```cpp
+
+ class AirlineTicket
+{
+public:
+    AirlineTicket(){
+        .... //initialize members
+    } //instead of  AirlineTicket()
+...
+```
+* put the initializations in the body of the constructor, outside the class definition
+```cpp
+//oop.cpp
+AirlineTicket :: AirlineTicket(){
+    // Initialize data members.
+    m_passengerName = "Unknown Passenger";
+    m_numberOfMiles = 0;
+    m_hasEliteSuperRewardsStatus = false;    
+}
+```
+
+* use a constructor initializer, which follows a colon after the constructor header
+```cpp
+//opp.cpp
+AirlineTicket::AirlineTicket(): m_passengerName { "Unknown Passenger" }, m_numberOfMiles { 0 }, m_hasEliteSuperRewardsStatus { false }
+
+{
+
+}
+```
+If your class additionally needs to perform some other types of initializations, such as opening a
+file, allocating memory, and so on, then write a constructor to handle those initializations.
+
+
+**Deleting members in destructor**
+
+Destructors are required if you need to perform some cleanup,
+such as closing files, and freeing memory but usually destructor doesn’t do anything and can simply be removed from this class unless what is mentioned.
+
+in our case, we don't have pointers or opened files, so we can write an empty destructor.
+
+```cpp
+AirlineTicket::~AirlineTicket()
+{
+// Nothing to do in terms of cleanup
+}
+```
+
+**Definitions of the class members**
+as in a constructor, it can be defined within the class or outside the class.
+
+**outside the class**
+```cpp
+double AirlineTicket::calculatePriceInDollars()
+{
+    if (hasEliteSuperRewardsStatus()) {
+        // Elite Super Rewards customers fly for free!
+        return 0;
+    }
+    // The cost of the ticket is the number of miles times 0.1.
+    // Real airlines probably have a more complicated formula!
+    return getNumberOfMiles() * 0.1;
+}
+string AirlineTicket::getPassengerName() { return m_passengerName; }
+void AirlineTicket::setPassengerName(string name) { m_passengerName = name; }
+int AirlineTicket::getNumberOfMiles() { return m_numberOfMiles; }
+void AirlineTicket::setNumberOfMiles(int miles) { m_numberOfMiles = miles; }
+bool AirlineTicket::hasEliteSuperRewardsStatus()
+{
+    return m_hasEliteSuperRewardsStatus;
+}
+void AirlineTicket::setHasEliteSuperRewardsStatus(bool status)
+{
+    m_hasEliteSuperRewardsStatus = status;
+}
+```
+**inside the class**
+```cpp
+class AirlineTicket
+{
+public:
+    double calculatePriceInDollars()
+    {
+        if (hasEliteSuperRewardsStatus()) { return 0; }
+        return getNumberOfMiles() * 0.1;
+    }
+    std::string getPassengerName() { return m_passengerName; }
+    void setPassengerName(std::string name) { m_passengerName = name; }
+    int getNumberOfMiles() { return m_numberOfMiles; }
+    void setNumberOfMiles(int miles) { m_numberOfMiles = miles; }
+    bool hasEliteSuperRewardsStatus() { return m_hasEliteSuperRewardsStatus; }
+    void setHasEliteSuperRewardsStatus(bool status)
+    {
+        m_hasEliteSuperRewardsStatus = status;
+    }
+private:
+    std::string m_passengerName { "Unknown Passenger" };
+    int m_numberOfMiles { 0 };
+    bool m_hasEliteSuperRewardsStatus { false };
+};
+```
+
+**using class**
+the code that uses the class called the client code, to define a class, includes the header file.
+
+```cpp
+#include "16oop.cpp"
+int main() {
+    AirlineTicket myTicket;
+    myTicket.setPassengerName("Ziad Assem");
+    myTicket.setNumberOfMiles(700);
+    double cost { myTicket.calculatePriceInDollars() };
+    std::cout<<"This ticket will cost " <<cost;;
+    return 0;
+}
+```
+
+### 17- Scope Resolution
+As a C++ programmer, you need to familiarize yourself with the concept of a scope, which defines where an item is visible. Every name in your program, including variable, function, and class names,
+is in a certain scope. You create scopes with 
+* namespaces 
+* function definitions
+* blocks delimited by curly braces 
+* class definitions
+
+Variables that are initialized in the initialization statement of for
+loops and range-based for loops are scoped to that for loop and are not visible outside the for loop.
+Similarly, variables initialized in an initializer for if or switch statements are scoped to that if or switch statement and are not visible outside that statement.
+
+on accessing a variable, function, or class, the name is first looked up in the nearest enclosing scope, then the parent scope, and so forth, up to the global scope. Any name not in a namespace, function, block delimited by curly braces, or class is assumed to be in the global scope. If it is not found in the global scope, at that point the
+the compiler generates an undefined symbol error.
+
+Sometimes names in scopes hide identical names in other scopes. Other times, the scope you want is not part of the default scope resolution from that particular line in the program. If you don’t want the
+default scope resolution for a name, you can qualify the name with a specific scope using the scope
+resolution operator::. 
+
+```cpp
+class Demo
+{
+public:
+int get() { return 5; }
+};
+int get() { return 10; }
+namespace NS
+{
+int get() { return 20; }
+}
+```
+
+The global scope is unnamed, but you can access it specifically by using the scope resolution operator by itself (with no name prefix). The different get() functions can be called as follows. In this example, the code itself is in the main() function, which is always in the global scope:
+
+```cpp
+int main()
+{
+    Demo d;
+    println("{}", d.get()); // prints 5
+    println("{}", NS::get()); // prints 20
+    println("{}", ::get()); // prints 10
+    println("{}", get()); // prints 10
+}
+```
+
+**unnamed namespace and the global namespace**
+If the earlier namespace called NS is defined as an unnamed /anonymous namespace, that is, a namespace without a name as follows:
+```cpp
+namespace
+{
+int get() { return 20; }
+}
+```
+then the following line will cause a compilation error about ambiguous name resolution because you would have a `get()` defined in the global scope, and another `get()` defined in the unnamed
+namespace.
+
+```cpp
+std::cout<< get();
+```
+
+The same error occurs if you add the following using a directive right before the main() function:
+```cpp
+using namespace NS;
+```
+
+### 18- Uniform Initialization
+
+Before C++11, the initialization of types was not always uniform. For example, the definitions of a structure, a class, and variables are different. the uniform initialization provides a consistent syntax for initializing different types of objects. in addition to that uniform initialization provides more advantages that will be discussed in this section:
+
+* it provides a consistent syntax for initializing different types of objects
+* it performs zero-initialization of variables;by just specifying an
+empty set of curly braces
+* it prevents narrowing
+* initializer to initialize arrays that are members of a class
+
+**consistent syntax for initializing different types of objects**
+take the following definitions of a circle, once as a structure, and once as a class:
+
+```cpp
+struct CircleStruct
+{
+    int x, y;
+    double radius;
+};
+
+class CircleClass
+{
+public:
+    CircleClass(int x, int y, double radius)
+    : m_x { x }, m_y { y }, m_radius { radius } {}
+private:
+    int m_x, m_y;
+    double m_radius;
+};
+```
+
+before uniform initialization, the initialization of a variable of type CircleStruct, a variable of type CircleClass, and an array looked different:
+```cpp
+CircleStruct myCircle1 = { 10, 10, 2.5 };
+CircleClass myCircle2(10, 10, 2.5);
+int arr[] = {0,1};
+```
+
+after uniform initialization, initialization of a variable of type Circle struct, a variable of type CircleClass, and an array are the same.
+```cpp
+    CircleStruct myCircle5 { 10, 10, 2.5 };
+    CircleClass myCircle6 { 10, 10, 2.5 };
+    int arr[] {1,2,3};
+```
+Uniform initialization is not limited to structures and classes. You can use it to initialize almost anything in C++. For example, the following code initializes all four variables with the value 3:
+
+```cpp
+int a = 3;
+int b(3);
+int c = { 3 }; // Uniform initialization
+int d { 3 }; // Uniform initialization
+```
+
+**zero-initialization of variables**
+Uniform initialization can be used to perform zero-initialization of variables; you just specify an
+empty set of curly braces, as shown here:
+```cpp
+int e { }; // Uniform initialization, e will be 0
+```
+This syntax can also be used with structures. If you create an instance of the Employee struct as follows, then its data members are default initialized, which, for primitive types such as char and int, means they’ll contain whatever random data is left in memory.
+However, if you create the instance as follows, then all data members are zero-initialized:
+
+```cpp
+int main(){
+    CircleStruct zerosCircle {};
+    std::cout<<zerosCircle.x << " "<<zerosCircle.y <<" " << zerosCircle.radius <<"\n";
+
+    CircleStruct randomCircle ;
+    std::cout<<randomCircle.x << " "<<randomCircle.y <<" " << randomCircle.radius <<"\n";
+
+}
+```
+
+```bash
+0 0 0
+-1732831152 32758 6.95136e-310
+```
+**prevents narrowing**
+A benefit of using uniform initialization is that it prevents narrowing. When using the old-style assignment syntax to initialize variables, C++ implicitly performs narrowing, as shown here:
+```cpp
+int main()
+{
+    int x = 3.14;
+}
+```
+
+For the statement in main(), C++ automatically truncates 3.14 to 3 before assigning it to x. Some compilers might issue a warning about this narrowing, while others won’t. In any case, narrowing
+conversions **should not go unnoticed, as they might cause subtle or not-so-subtle bugs**.
+
+With uniform initialization, the assignment to x must generate a compilation error if your compiler fully conforms
+to the C++11 standard:
+```cpp
+int main(){
+    int b {3.14}; //error   
+}
+```
+type 'double' cannot be narrowed to 'int' in the initializer list [-Wc++11-narrowing].
+
+**initializer to initialize arrays that are members of a class**
+```cpp
+class MyClass
+{
+public:
+MyClass()
+: m_array { 0, 1, 2, 3 }
+{
+}
+private:
+int m_array[4];
+};
+```
+Uniform initialization can be used with the Standard Library containers as well—such as `std::vector`, already demonstrated earlier in this Readme.
+
+### 19- Designated Initializers
+Designated initializers initialize data members of aggregates using their name (c++20). 
+
+An aggregate type is
+* an object of an array type
+* an object of a structure 
+* a class that satisfies the following restrictions:
+  * public data members
+  * no user-declared or inherited constructors, no virtual functions (discussed later in chapter 10 in the book), and no virtual, private, or protected base classes (see Chapter 10).
+
+A designated initializer starts with a dot followed by the name of a data member. 
+
+Let’s take a look at a slightly modified Employee structure. This time the salary data member has a default value of 75,000.
+```cpp
+struct Employee {
+    char firstInitial;
+    char lastInitial;
+    int employeeNumber;
+    int salary { 75'000 };
+};
+
+int main(){
+    Employee anEmployee {
+        .firstInitial = 'J',
+        .lastInitial = 'D',
+        .employeeNumber = 42,
+        .salary = 80'000
+};
+}
+```
+
+Designated initializers must be in the same order as the declaration order of the data members. Mixing designated initializers and nondesignated initializers is not allowed. Any data members that are not initialized using a designated initializer are initialized with their default values.
+
+```cpp
+int main(){
+      Employee anEmployee {
+        .lastInitial = 'D', //error
+        .firstInitial = 'J',
+        .employeeNumber = 42,
+        .salary = 80'000
+    };
+}
+```
+
+A benefit of using such designated initializers is that it’s much easier to understand what a designated initializer is initializing compared to using the uniform initialization syntax.
+With designated initializers, you can skip the initialization of certain members if you are satisfied with their default values.
+
+For example, when creating an employee, you could skip initializing
+employeeNumber, in which case employeeNumber is zero-initialized as it doesn’t have an in-class initializer:
+```cpp
+Employee anEmployee {
+.firstInitial = 'J',
+.lastInitial = 'D',
+.salary = 80'000
+};
+```
+With the uniform initialization syntax, this is not possible, and you have to specify 0 for the employee number as follows:
+```cpp
+Employee anEmployee { 'J', 'D', 0, 80'000 };
+```
+If you skip initializing the salary data member as follows, then salary gets its default value, which is its in-class initialization value, 75,000:
+```cpp
+Employee anEmployee {
+.firstInitial = 'J',
+.lastInitial = 'D'
+};
+```
+A final benefit of using designated initializers **is that when members are added to the data structure, existing code using designated initializers keeps working. The new data members will just be initialized with their default values**.
+
