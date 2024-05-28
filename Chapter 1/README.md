@@ -18,10 +18,24 @@ Note: this is some notes from the chapter, not a comprehensive guide of it
 - [13-Structured Bindings](#13-structured-bindings)
 - [14- Loops](#14--loops)
 - [15- Initializer Lists](#15--initializer-lists)
-- [16- C++ as an Object-Oriented Language](#16--c++-as-an-object-oriented-language)
+- [16- C++ as an Object-Oriented Language](#16--c-as-an-object-oriented-language)
 - [17- Scope Resolution](#17--scope-resolution)
 - [18- Uniform Initialization](#18--uniform-initialization)
 - [19- Designated Initializers](#19--designated-initializers)
+- [20- Pointers and Dynamic Memory](#20--pointers-and-dynamic-memory)
+    - [Stack](#stack)
+    - [Free Store/Heap](#free-storeheap)
+    - [Working with Pointers](#working-with-pointers)
+    - [Null Pointers and nullptr](#null-pointers-and-nullptr)
+    - [Memory Allocation in C++ using new](#memory-allocation-in-c-using-new)
+    - [Dereferencing a struct or a class](#dereferencing-a-struct-or-a-class)
+    - [Dynamically Allocated Arrays](#dynamically-allocated-arrays)
+    - [new/delete instead of malloc()/free()](#newdelete-instead-of-mallocfree)
+- [21- The Use of const](#21--the-use-of-const)
+    - [const as a Qualifier for a Type](#const-as-a-qualifier-for-a-type)
+    - [const with Pointers](#const-with-pointers)
+    - [const to Protect Parameters](#const-to-protect-parameters)
+    - [const Member Functions](#const-member-functions)
 
 **C vs C++**
 
@@ -1480,7 +1494,7 @@ requires narrowing.
 int c { sum({ 1, 2, 3.0 }) };
 ```
 
-### 16- C++ as an Object-Oriented Language
+### 16- C++ as an Object Oriented Language
 If you are a C programmer, you may have viewed the features covered so far in this chapter as convenient additions to the C language. As the name C++ implies, in many ways the language is just
 a “better C.” There is one major point that this view overlooks: unlike C, C++ is an object-oriented language. Object-oriented programming (OOP) is a different, arguably more natural, way to write code. 
 OOP is a big interesting topic with theories, concepts, and best practices independent of a programming language (i.e. the concepts can be applied to any programming language that supports OOP). hence it can't be covered in just a section of a summary of a chapter, but it will be covered further in another chapter (Chapter 5, “Designing with
@@ -1936,3 +1950,297 @@ Employee anEmployee {
 ```
 A final benefit of using designated initializers **is that when members are added to the data structure, existing code using designated initializers keeps working. The new data members will just be initialized with their default values**.
 
+
+### 20- Pointers and Dynamic Memory
+before understanding pointers, let's introduce how does memory is organized in a C++ program. Memory in a C++ program is divided into two parts the stack and the free store (heap). 
+
+#### Stack
+
+One way to visualize the stack is as a
+deck of cards. The current top card represents the current scope of the program, usually the function that is currently being executed. All variables declared inside the current function will take up memory in the top stack frame, the top card of the deck. If the current function, for example, `foo()`, calls another function `bar()`, a new card (stack frame) is put on the deck so that `bar()` has its own stack frame to work with. Any parameters passed from `foo()` to `bar()` are copied from the `foo()` stack frame into the `bar()` stack frame.
+
+Stack frames are nice because they provide an isolated memory workspace for each function. If a variable is declared inside the `foo()` stack frame, calling the `bar()` function won’t change it unless you specifically tell it to. Also, when the `foo()` function finishes its execution (i.e. reaches its end), the stack frame is removed from the memory with all of the variables declared within the function.
+
+Variables that are stackallocated do not need to be deallocated (deleted) by the programmer; since it happens automatically.
+
+
+#### Free Store/Heap
+The free store is an area of memory that is completely independent of the current function or stack frame. You can put variables on the free store if you want them to exist even when the function in which they were created has finished its execution and been removed from the memory. 
+
+The free store is less structured than the stack. You can think of it as just a collection of bits. Your program can add new bits to this collection at any time or modify bits that are already in this collection. 
+
+unlike stack frames, You have to make sure that you deallocate (delete) any memory that you allocated on the free store. This does not happen automatically unless you use **smart pointers**, which are discussed later in the book in Chapter 7, “Memory Management.
+
+
+#### Working with Pointers
+**WARNING** *Pointers are introduced here because you will encounter them, especially in legacy code bases. In the new code, however, such raw/naked pointers are allowed only if there is no ownership involved. Otherwise, you should use one of the smart pointers.*
+
+You can put anything on the free store by explicitly allocating memory for it. For example, to put an
+integer on the free store, you need to allocate memory for it, but first you need to declare a pointer:
+
+```cpp
+int* myIntegerPointer;
+```
+the declared pointer does not yet point to anything specific because it is not assigned to anything; it is an uninitialized variable. Hence it has a random memory address. Working with such pointers will most likely make your program crash. since you don't know where it points and where it will go hence its name is **Wild Pointer**, That’s why you should always declare and initialize your pointers at the same time! You can initialize them to a null pointer (`nullptr`) if you don’t want to allocate memory.
+
+```cpp
+int* myIntegerPointer { nullptr };
+```
+
+#### Null Pointers and nullptr
+A null pointer is a special default value that no valid pointer will ever have and converts to false when used in a Boolean expression. Here’s an example:
+```cpp
+if (!myIntegerPointer) { /* myIntegerPointer is a null pointer. */ }
+```
+
+`nullptr` replaced the legacy `NULL` macro  in C, since both of them can be used in C++ but it is advised to use nullptr for the following reasons:
+* NULL is typically defined as (void *)0 and conversion of NULL to integral types is allowed. So it may cause calling some functions to be ambiguous such as the following:
+
+```cpp
+// C++ program to demonstrate the problem with NULL
+#include <bits/stdc++.h>
+using namespace std;
+
+// function with integer argument
+void fun(int N)   { cout << "fun(int)"; return;}
+
+// Overloaded function with char pointer argument
+void fun(char* s)  { cout << "fun(char *)"; return;}
+
+int main() 
+{
+ // Ideally, it should have called fun(char *),
+ // but it causes a compiler error.
+    fun(NULL);  
+}
+```
+since the NULL macro is `0`, it can be considered as integer `0` not only a null pointer, hence it can invoke `void fun(int N) ` and `void fun(char* s)`, although it should invoke `void fun(char* s)` only. hence the error of ambiguity is issued.
+
+
+In the above program, if  NULL is replaced with nullptr, the output will be
+```
+fun(char *)
+```
+
+* nullptr is convertible to bool, so a pointer can be checked before dereferencing via if-condition
+
+nullptr is a keyword that can be used at all places where NULL is expected. Like NULL, nullptr is implicitly convertible and comparable to any pointer type. Unlike NULL, it is not implicitly convertible or comparable to integral types.
+
+nullptr is a [prvalue](https://stackoverflow.com/questions/3601602/what-are-rvalues-lvalues-xvalues-glvalues-and-prvalues) of type nullptr_t that converts integral literal to 0 while the typecast of NULL is (void *)0 whose integer constant is 0.
+
+#### Memory Allocation in C++ using new
+
+You use the `new` operator to allocate the memory:
+```cpp
+myIntegerPointer = new int;
+```
+
+In this case, the pointer points to the address of just a single integer value. To access this value, you need to dereference the pointer. Think of dereferencing as following the pointer’s arrow to the actual value on the free store. To set the value of the newly allocated free store integer, you would use code like the following:
+
+```cpp
+*myIntegerPointer = 8;
+```
+
+After you are finished with your dynamically allocated memory, you need to deallocate the memory using the delete operator. To prevent the pointer from being used after having deallocated the memory it points to, it’s recommended to set it to nullptr, or it will point to freed memory as it will dangling, hence it will be called a dangling pointer.
+
+```cpp
+delete myIntegerPointer;
+myIntegerPointer = nullptr;
+```
+
+**WARNING** *A pointer must be valid before it is dereferenced Dereferencing a null pointer or an uninitialized pointer causes undefined behavior. Your program might crash, but it might just as well keep running and start giving strange results.*
+
+Pointers don’t always point to free-store memory. You can declare a pointer that points to a variable on the stack, even another pointer. To get a pointer to a variable, you use the & (“address
+of”) operator:
+```cpp
+int i { 8 };
+int* myIntegerPointer { &i }; // Points to the variable with the value 8
+```
+
+#### Dereferencing a struct or a class
+
+C++ has a special syntax for dealing with pointers to structures or classes. Technically, if you have a pointer to a structure or a class, you can access its fields by first dereferencing it with *, and then
+using the normal `.` syntax, as in the code that follows. This code snippet also demonstrates how to dynamically allocate and deallocate an Employee instance.
+```cpp
+Employee* anEmployee { new Employee { 'J', 'D', 42, 80'000 } };
+cout<<(*anEmployee).salary;
+delete anEmployee;
+anEmployee = nullptr;
+```
+This syntax is a little messy. The `->` (arrow) operator lets you perform both the dereference and the field access in one step. The following statement is equivalent to the previous cout call but is easier to read:
+```cpp
+cout<<anEmployee->salary;
+```
+Remember the concept of short-circuiting logic, discussed earlier in this chapter? This can be useful in combination with pointers to avoid using an **invalid pointer**, as in the following example:
+```cpp
+bool isValidSalary { anEmployee && anEmployee->salary > 0 }; //anEmployee is dereferenced to get the salary only if it is a valid pointer. 
+//or to be more verbose
+bool isValidSalary { anEmployee != nullptr && anEmployee->salary > 0 };
+```
+
+#### Dynamically Allocated Arrays
+The free store can also be used to dynamically allocate arrays. You use the `new[]` operator to allocate memory for an array.
+```cpp
+int arraySize { 8 };
+int* myVariableSizedArray { new int[arraySize] };
+```
+
+This allocates enough memory to hold arraySize integers. the pointer variable will reside on the stack, but the array that was dynamically created will live on the free store. Now that the memory has been allocated, you can work with `myVariableSizedArray` as though it
+were a regular stack-based array:
+```cpp
+myVariableSizedArray[3] = 2;
+```
+
+When your code is done with the array, it should remove the array from the free store so that other variables can use the memory. In C++, you use the `delete[]` operator to do this:
+```cpp
+delete[] myVariableSizedArray;
+myVariableSizedArray = nullptr;
+```
+The brackets after delete indicate that the delete keyword will delete an array.
+
+#### new/delete instead of malloc()/free()
+If you do need dynamically allocated memory, avoid using malloc() and free() from C. Instead, use new and delete, or new[] and delete[] from C++. However, in modern C++, the goal is to avoid new, delete, new[], and delete[] altogether, and use more modern constructs such as Standard Library containers, e.g., std::vector, and smart pointers.
+
+**why to use new/delete instead of malloc()/free()**
+
+* new and delete are built into C++ and take advantage of all C++ features. malloc() and free() are just function calls.
+
+* malloc() just returns some bytes. It doesn’t set them to any particular value. If you want to put a class instance into the bytes, you have to call the constructor explicitly, which is what new does.
+
+* free() doesn’t destroy objects. delete does.
+
+* malloc() sometimes returns nullptr, which the program then has to handle, but this happens so infrequently that many programs don’t bother, leading to a crash at run time. new throws an exception, which allows the program to clean up before exiting. If you are suspicious of exception handling for some reason, there is a variant of new that returns nullptr.
+
+* The behavior of new can be overridden for specific types, to implement special (like more efficient) allocation strategies for heavily used object types. new can also be overridden globally. You can link in your custom malloc(), but it changes the behavior of every allocation, which is less useful.
+
+[source](https://www.quora.com/Why-is-using-malloc-or-its-relatives-considered-bad-in-modern-C)
+
+
+**WARNING** *To prevent memory leaks, every call to new should be paired with a call to delete, and every call to new[] should be paired with a call to delete[]. Not calling delete or delete[], or mismatching calls, results in memory leaks or worse.*
+
+### 21- The Use of const
+const keyword has different usages in C++, it will be discussed in this section.
+#### const as a Qualifier for a Type
+the keyword const for a variable prevents this variable from being modified. In C, programmers often use the preprocessor `#define` to declare symbolic names for values that won’t change during the execution of the program, such as the **version number**. In C++, programmers are encouraged to avoid #define in favor of using const to define constants. 
+
+The big advantage of `const` over `#define` is type checking. `#defines` can't be type-checked, so this can cause problems when trying to determine the data type. If the variable is, instead, a constant then we can grab the type of data that is stored in that constant variable.
+
+Defining a constant with const is just like defining a variable, except that the compiler guarantees that the code cannot change the value. Here are some examples:
+
+```cpp
+const int versionNumberMajor { 2 };
+const int versionNumberMinor { 1 };
+const std::string productName { "Super Hyper Net Modulator" };
+const double PI { 3.141592653589793238462 };
+```
+
+You can mark any variable const, including global variables and class data members.
+
+#### const with Pointers
+
+When a variable contains one or more levels of indirection via a pointer, applying const becomes
+trickier. Consider the following lines of code:
+```cpp
+int* ip;
+ip = new int[10];
+ip[4] = 5;
+```
+Suppose that you decide to apply const to ip. consider what it means. 
+* Do you want to prevent the ip variable itself from being changed 
+* Do you want to prevent the values to which it points from being changed
+
+```cpp
+int* const ip {nullptr}
+ip = new int[10];
+ip[4] = 5; 
+```
+
+for example, the previous code implies which statement, is it the first or the second? to figure out this complicated variable declaration here is an easy-to-remember rule:
+
+> Read from right to left. For example, int* const ip reads from
+right to left as “ip is a const pointer to an int.” Further, int const* ip reads as "ip is a pointer to a const int," and const int* ip reads as “ip is a pointer to an int constant.
+
+hence the previous example will issue a compilation error on the second line
+
+```cpp
+int* const ip {nullptr}
+ip = new int[10];// DOES NOT COMPILE!
+ip[4] = 5; // Error: dereferencing a null pointer
+```
+
+```cpp
+const int* ip;
+ip = new int[10];
+ip[4] = 5; // DOES NOT COMPILE!
+```
+it reads as a pointer to constant int so the third line (changing the pointee) will issue a compilation error.
+
+```cpp
+int const* ip;
+ip = new int[10];
+ip[4] = 5; // DOES NOT COMPILE!
+```
+Putting the const before or after the int makes no difference in its functionality.
+
+```cpp
+int const* const ip { nullptr };
+```
+const pointer to constant int pointee.
+
+
+```cpp
+const int * const * const * const ip { nullptr };
+```
+
+declares ip as a constant pointer to a constant pointer to a constant pointer to a constant integer, and initializes ip to nullptr. This means ip itself and all levels of pointers it eventually points to are constant and cannot be changed.
+
+
+#### const to Protect Parameters
+
+In C++, you can cast a non-const variable to a const variable. Why would you want to do this? It offers some degree of protection from other code changing the variable. If you are calling a function that a co-worker of yours is writing and you want to ensure that the function doesn’t change
+the value of an argument you pass in, you can tell your co-worker to have the function take a const parameter. If the function attempts to change the value of the parameter, it will not compile (i.e. to protect the passed parameter by reference from being edited).
+In the following code, a string* is automatically cast to a const string* in the call to mysteryFunction(). If the author of mysteryFunction() attempts to change the value of the passed string, the code will not compile. There are ways around this restriction, but using them requires conscious effort. C++ only protects against accidentally changing const variables.
+```cpp
+void mysteryFunction(const string* someString)
+{
+*someString = "Test"; // Will not compile
+}
+int main()
+{
+string myString { "The string" };
+mysteryFunction(&myString); // &myString is a string*
+}
+```
+also use const can be used on primitive-type parameters to prevent accidentally changing them in the body of the function. For example, the following function has a const integer parameter. In the body of the function, you cannot modify the param integer. If you do try to modify it, the compiler will generate an error.
+```cpp
+void func(const int param) { /* Not allowed to change param... */ }
+```
+
+#### const Member Functions
+A second use of the const keyword is to mark class member functions as const, preventing them from modifying data members of the class. for example the member size in a vector, or the length in a string.
+
+The AirlineTicket class introduced earlier can be modified to mark all read-only member functions as const. The const must be added to both the member function declaration and its definition. If any const member function tries to modify one of the AirlineTicket data members, the compiler will emit an error.
+
+```cpp
+class AirlineTicket
+{
+public:
+    double calculatePriceInDollars() const;
+    std::string getPassengerName() const;
+    void setPassengerName(std::string name);
+    int getNumberOfMiles() const;
+    void setNumberOfMiles(int miles);
+    bool hasEliteSuperRewardsStatus() const;
+    void setHasEliteSuperRewardsStatus(bool status);
+    private:
+    std::string m_passengerName { "Unknown Passenger" };
+    int m_numberOfMiles { 0 };
+    bool m_hasEliteSuperRewardsStatus { false };
+};
+
+std::string AirlineTicket::getPassengerName() const
+{
+return m_passengerName;
+}
+....
+```
