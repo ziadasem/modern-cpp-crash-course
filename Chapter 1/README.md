@@ -1,7 +1,8 @@
 
 # Notes from Chaptr 1:&nbsp;&nbsp;A Crash Course in C++ and the Standard Library
 
-Note: this is some notes from the chapter, not a comprehensive guide of it
+A disscussion of the topics in this chapter with more information from different resources and more topics are added.
+
 - [1- Headers, Imports, and I/O Streams](#1--headers-imports-and-io-streams)
 - [2- Namespaces](#2--namespaces)
 - [3- Literals](#3--literals)
@@ -36,6 +37,22 @@ Note: this is some notes from the chapter, not a comprehensive guide of it
     - [const with Pointers](#const-with-pointers)
     - [const to Protect Parameters](#const-to-protect-parameters)
     - [const Member Functions](#const-member-functions)
+
+
+- [22- References](#22--references)
+    - [Reference Variables](#reference-variables)
+    - [Reference Variables; References to a const variable](#reference-variables-references-to-a-const-variable)
+    - [Reference Variables; References to Pointers and Pointers to References](#reference-variables-references-to-pointers-and-pointers-to-references)
+    - [Reference Variables; Structured Bindings and References](#reference-variables-structured-bindings-and-references)
+    - [Reference Data Members](#reference-data-members)
+    - [Reference Parameters](#reference-parameters)
+    - [Reference Parameters; Pass-by-Reference-to-const](#reference-parameters-pass-by-reference-to-const)
+    - [Reference Return Values](#reference-return-values)
+    - [Deciding Between References and Pointers](#deciding-between-references-and-pointers)
+    - [Does Reference take memory? the Disassembly will answer](#does-reference-take-memory-the-disassembly-will-answer)
+- [23- const_cast()](#23--const_cast)                                                                                             
+    - [casting away constness](#casting-away-constness)
+    - [change non-const class members inside a const member function](#change-non-const-class-members-inside-a-const-member-function)               
 
 **C vs C++**
 
@@ -1748,7 +1765,7 @@ int main()
 }
 ```
 
-**unnamed namespace and the global namespace**
+#### unnamed namespace and the global namespace
 If the earlier namespace called NS is defined as an unnamed /anonymous namespace, that is, a namespace without a name as follows:
 ```cpp
 namespace
@@ -1778,7 +1795,7 @@ empty set of curly braces
 * it prevents narrowing
 * initializer to initialize arrays that are members of a class
 
-**consistent syntax for initializing different types of objects**
+#### consistent syntax for initializing different types of objects
 take the following definitions of a circle, once as a structure, and once as a class:
 
 ```cpp
@@ -1821,7 +1838,7 @@ int c = { 3 }; // Uniform initialization
 int d { 3 }; // Uniform initialization
 ```
 
-**zero-initialization of variables**
+#### zero-initialization of variables
 Uniform initialization can be used to perform zero-initialization of variables; you just specify an
 empty set of curly braces, as shown here:
 ```cpp
@@ -1845,7 +1862,7 @@ int main(){
 0 0 0
 -1732831152 32758 6.95136e-310
 ```
-**prevents narrowing**
+#### prevents narrowing
 A benefit of using uniform initialization is that it prevents narrowing. When using the old-style assignment syntax to initialize variables, C++ implicitly performs narrowing, as shown here:
 ```cpp
 int main()
@@ -1866,7 +1883,7 @@ int main(){
 ```
 type 'double' cannot be narrowed to 'int' in the initializer list [-Wc++11-narrowing].
 
-**initializer to initialize arrays that are members of a class**
+#### initializer to initialize arrays that are members of a class
 ```cpp
 class MyClass
 {
@@ -2244,3 +2261,856 @@ return m_passengerName;
 }
 ....
 ```
+
+
+
+### 22- References
+
+A reference in C++ is an alias for another variable. All modifications to the reference change the value of the
+variable to which it refers. a reference can be viewed as an implicit constant pointer that saves the trouble of taking the address of variables and dereferencing the pointer. or, references can be viewed as just another name for the original variable. 
+
+references can be created to the following: 
+* reference to variables
+* reference to  data members in classes
+* references to parameter to a function
+* reference to a return from a function
+
+every stated point will be discussed in detail in this section.
+
+#### Reference Variables
+
+```cpp
+int x { 3 };
+int& xRef { x };
+```
+
+defeniation of `xRef` with `int&` identifier and assigning it to `x`, means that xRef is another name of x, every action executed on x/xRef will be executed on xRef/x.
+
+```cpp
+x = 5 ;
+xRef = 12 ;
+std::cout << x  ;// 12
+x = 5 ;
+std::cout << xRef  ;// 5
+```
+Attaching `&` to a type (e.g. `int`) indicates that the variable is a reference.
+
+
+Reference variables must be initialized as soon as they are created, like this:
+
+```cpp
+int main(){
+    int a {4};
+    int& aRef ;
+}
+```
+```
+declaration of reference variable 'aRef' requires an initializer
+```
+so **A reference variable must always be initialized when it’s created.**
+
+**Modifying References**
+**can a reference variable reference to another variable after being assigned?** References cannot be changed once they are created. If you assign a variable to a reference when the reference is declared, the reference refers to that variable. However, if you assign a variable to a reference after that, the variable to which the reference refers is changed to the value of the variable being assigned. you can think when calling a reference as doing implicit dereferencing.
+
+```cpp
+int x { 3 }, y { 4 };
+int& xRef { x };
+xRef = y; // Changes value of x to 4. Doesn't make xRef refer to y.
+```
+
+does the following work?
+```cpp
+ xRef = &y;
+```
+**no**, because you are dereferencing an int (xRef) and setting an address to int, so **it will not compile**.
+
+does the following make zRef reference to xRef?
+
+```cpp
+int x { 3 }, z { 5 };
+int& xRef { x };
+int& zRef { z };
+zRef = xRef;
+```
+
+**no**, dereferencing zRef and setting the value to dereferenced xRef, so this operation just Assigns values, not references.
+
+so we can state that **Once a reference is initialized to refer to a specific variable, you cannot change the reference to refer to another variable; you can change only the value of the variable the reference refers to**.
+
+#### Reference Variables; References to a const variable
+
+const applied to references is usually easier than const applied to pointers for two reasons. 
+* references are const by default, in that, you can’t change to what they refer. So, there is no need to mark them const explicitly
+* you can’t create a reference to a reference, so there is usually only one level of indirection with references. The only way to get multiple levels of indirection is to create a reference to a pointer
+
+Thus reference-to-const in C++, means something like this:
+```cpp
+int z;
+const int& zRef { z };
+z = 181 ; 
+zRef = 198; // DOES NOT COMPILE
+```
+By applying const to the int&, the `zRef` became constant not the referenced `z`, hence prevention of assignment to `zRef `not to `z`. 
+
+**reference to an unnamed value**
+
+You cannot create a reference to an unnamed value, such as an integer literal unless the reference is to a const value. since an unnamed value is not a container (i.e. a const value), then reference to the unnamed value should be constant. 
+
+```cpp
+int& unnamedRef1 { 5 }; // DOES NOT COMPILE
+const int& unnamedRef2 { 5 }; // Works as expected
+```
+
+also, you can create a reference to rvalue by adding `&&` after the identifier as follows:
+```cpp
+int&& xRef {5};
+xRef = 6 ;
+```
+
+unnamed values can be the values returned by a function as follows:
+
+```cpp
+string getString() { return "Hello world!"; }
+```
+
+```cpp
+string& string1 { getString() }; // DOES NOT COMPILE
+const string& string2 { getString() }; // Works as expected
+string&& string2 {getString()}; //Works as expected
+```
+
+Conceptually, an rvalue expression (unnamed value) creates a temporary object. then it is referenced by the initialized reference. so it creates a reference to unnamed values and creates two objects; the value and the reference.
+
+#### Reference Variables; References to Pointers and Pointers to References
+
+You can create references to any type, including pointer types. Here is an example of a reference to a
+pointer to int:
+
+```cpp
+int* intP { nullptr };
+int*& ptrRef { intP };
+ptrRef = new int;
+*ptrRef = 5;
+delete ptrRef; ptrRef = nullptr;
+```
+
+the `int*& ptrRef { intP };` expression may be strange, but it is similar to defining a reference to any data type. `&` references to `int*`.
+
+#### Reference Variables; Structured Bindings and References
+
+```cpp
+auto& [theString, theInt] { myPair }; // Decompose into references-to-non-const
+const auto& [theString, theInt] { myPair }; // Decompose into references-to-const
+```
+
+
+#### Reference Data Members
+
+as referencing regular variables we can reference data members, however, a reference must be initialized with a value, and data members are usually initialized within the body of the constructor. this issue that prevents the definition of references in a class can be solved by initializing the reference in the constructor initializer.
+
+```cpp
+class MyClass
+{
+public:
+    MyClass(int& ref) : m_ref { ref } { /* Body of constructor */ }
+private:
+    int& m_ref;
+};
+```
+
+```cpp
+class MyClass //error: constructor for 'MyClass' must explicitly initialize the reference member 'm_ref'
+{
+public:
+    MyClass(int& ref) {  m_ref = ref ;  }
+private:
+    int& m_ref;
+};
+```
+
+#### Reference Parameters
+using stand-alone reference variables or reference data members are not often used. however, The most common use of references is for parameters to functions. The default parameter-passing semantics is pass-by-value: functions receive copies of their arguments. When those parameters are modified, the original arguments remain unchanged. Pointers to stack variables are often used in C to allow functions to modify variables in other stack frames/other local variables. By dereferencing the pointer, the function can change the memory that represents the variable even though that variable isn’t in the current stack frame. The problem with this approach is that it brings the messiness of pointer syntax into
+what is really a simple task. the following example shows the potential bugs that may come to action due to the messiness of pointer syntax.
+
+in the following example it is required to increment the passed variable, so passing a pointer approach is used.
+```cpp
+void addOne(int* i)
+{
+ (*i) ++; //dereference the variable then increment it
+}
+
+int main(){
+    int val {0};
+    int* i {&val} ;
+
+    addOne(i); 
+    std::cout << val << "\n"; //1
+    return 0;
+
+}
+```
+
+this is a correct syntax, but what if a developer forgets the brackets:
+
+```cpp
+void addOne2(int* i)
+{
+ *(i)++ ;  
+ //increment the copy of the pointer then dereference the new place, without doing anything to it, hence the compiler 
+ //issues a warning: expression result unused
+   
+}
+int main(){
+    int val {0};
+    int* i {&val} ;
+    addOne1(i); 
+    std::cout << val << "\n"; //0
+}
+
+```
+
+or the developer put the brackets in the wrong place:
+
+```cpp
+void addOne2(int* i)
+{
+ *(i)++ ;  
+ //increment the copy of the pointer then dereference the new place, without doing anything to it, hence the compiler 
+ //issues a warning: expression result unused
+   
+}
+
+int main(){
+    int val {0};
+    int* i {&val} ;
+    addOne2(i); 
+    std::cout << val << "\n"; //0
+}
+```
+
+all of these potential errors make the task of modifying the original variable a complex task, to make it an easier task using the **pass-by-reference** mechanism.
+
+Instead of passing pointers to functions, C++ offers a better mechanism, called pass-by-reference, where parameters are references instead of pointers. The following are implementations of an addOne() function. One is passing by value, passing by reference.
+
+PASS BY VALUE
+```cpp
+void addOne(int i)
+{
+ i++; // Has no real effect because this is a copy of the original
+}
+```
+
+PASS BY REFERENCE
+```cpp
+void addOne(int& i)
+{
+ i++; // Actually changes the original variable
+}
+```
+
+```cpp
+int main(){
+    int myInt { 7 };
+    addOne(myInt); //calls pass by reference
+ //myInt = 8
+}
+```
+
+A potential problem may arise when you have a pointer to something that you need to pass to a function that takes a reference. 
+```cpp
+int main(){
+    int myInt { 7 };
+    int* myPtr = &myInt;
+    addOne(myPtr); //error, requires a reference to int
+    return 0
+}
+```
+
+You can “convert” a pointer to a reference in this case by dereferencing the pointer. This action gives you the value to which the pointer points, which the compiler then uses to
+initialize the reference parameter. 
+
+```cpp
+int main(){
+    int myInt { 7 };
+    int* myPtr = &myInt;
+    addOne(*myPtr); //convert pointer to reference
+    return 0
+}
+```
+
+**pass by reference instead of return**
+if you have a function that needs to return an object of a class that is expensive to copy, or you want a function to return more than output you’ll often see the function accepting output parameters of type reference-to-non-const to such a class that the function then modifies, instead of directly returning such an object.
+```cpp
+#include <iostream>
+
+//not recommended to create a function that performs two operations
+void sumanddiff(int a, int b, int& sum, int& diff){
+ sum = a+b ;
+ diff = a-b ;
+}
+
+
+int main(){
+    int a = 10, b = 5, sum, diff;
+    sumanddiff(a, b, sum, diff);
+    std::cout << "Sum: " << sum << "\n"; //15
+     std::cout << "Difference: " << diff<< "\n"; //5
+    return 0;
+}
+```
+
+```
+Sum: 15
+Difference: 5
+```
+Developers thought that
+this was the recommended way to prevent any performance penalties for creating copies when returning objects from functions. However, even back then, compilers were usually smart enough to avoid any redundant copies. So, we have the following rule:
+
+> The recommended way to return objects from a function is to return them by value, instead of using output parameters.
+
+
+#### Reference Parameters; Pass-by-Reference-to-const
+
+The main purpose of using references is efficiency in passing parameters to function. When you pass a value into a function, an entire copy is made. When you pass a reference, you are really just passing a pointer to the original so the computer doesn’t need to make a copy. By passing a **reference-to-const**, you get the best of both worlds: no copy is made, and the original variable cannot be changed. References-toconst become more important when you are dealing with objects because they can be large and making copies of them can have unwanted side effects. 
+The following example shows how to pass an `std::string` to a function as a reference-to-const:
+```cpp
+include <iostream>
+
+void printString(const std::string& myString) { cout<< myString; }
+int main()
+{
+    std::string someString { "Hello World" };
+    printString(someString);
+    printString("Hello World"); // Passing literals works.
+}
+```
+
+**Pass-by-Reference vs. Pass-by-Value**
+
+Pass-by-reference is required when you want to modify the parameter and see those changes reflected in the variable passed to the function. However, you should not limit your use of pass-by-reference to only those cases. Pass-by-reference avoids copying the arguments to the function, providing two additional benefits:
+* Efficiency: Large objects could take a long time to copy. Pass-by-reference passes only a reference to the object into the function
+* Support: Not all classes allow pass-by-value
+
+If you want to leverage these benefits but do not want to allow the original objects to be modified, **you should mark the parameters const, giving you pass-by-reference-to-const**.
+
+**NOTE** *as passing by reference prevents making a copy of the passed parameter, for simple built-in types such as int and double you don’t need to modify the arguments you can pass it by value instead of creating a new reference*.
+
+#### Reference Return Values
+
+You can return a reference from a function. Of course, you can use this technique only if the variable to which the returned reference refers continues to exist following the function termination. however, never return a reference to a variable that is locally scoped to that function since it will get destroyed when the function ends.
+
+From the main reasons to return a reference from a function are: 
+* if you want to be able to assign to the return value
+directly as an lvalue (the left-hand side of an assignment statement). Several overloaded operators commonly return references, such as operators =, +=, and so on
+* if the return type is expensive to copy. By returning a reference or reference-to-const, the copying is avoided, but keep the earlier warning in mind. This is often used to return objects by reference-to-const from class member functions
+
+#### Deciding Between References and Pointers
+
+References in C++ could be considered redundant: everything you can do with references, you can accomplish with pointers, However, References make your programs cleaner and easier to understand. They are also safer than pointers: it’s impossible to have a null reference, and you don’t explicitly dereference references, so you can’t encounter any of the dereferencing errors associated with pointers.
+
+there are some use cases where pointers can be used instead of references:
+* when you need to change the location to which it points. since reference can't change what it references to
+* when the pointer is optional, that is when it can be nullptr
+
+in the legacy code, a way to distinguish between appropriate use of pointers and references was to consider who owns the memory. If the code receiving the variable became the owner and thus became responsible for releasing the memory associated with an object, it had to receive a pointer to the object. If the code receiving the variable didn’t have
+to free the memory, it received a reference. however, **nowadays** it is advised to Prefer references over pointers; that is, use a pointer only if a reference is not possible.
+
+**Function with pointers vs Function with references**
+
+Consider a function that splits an array of ints into two arrays: one of even numbers and one of odd numbers. The function doesn’t know how many numbers in the source array will be even or odd, so it should dynamically allocate the memory for the destination arrays after examining the source array. It should also return the sizes of the two new arrays. Altogether, there are four items to return: pointers to the two new arrays and the sizes of the two new arrays. recalling that if a function should return more than a value use pass-by-reference so we will use pass-by-reference.
+
+
+
+```cpp
+void separateOddsAndEvens(const int arr[], size_t size, int** odds, size_t* numOdds, int** evens, size_t* numEvens)
+{
+```
+since passing an array should pass the first element as a pointer so int* odds and int* evens, and since we pass by pointer so we will pass a pointer to pointer to evens and odds  `int** odds` and `int** evens`, same for size instead of returning multiple outputs we will use pointers, hence the arguments of the output will be `int** odds, size_t* numOdds, int** evens, size_t* numEvens`.
+
+```cpp
+void separateOddsAndEvens(const int arr[], size_t size, int** odds, size_t* numOdds, int** evens, size_t* numEvens)
+{
+
+ // Count the number of odds and evens (dereference).
+ *numOdds = *numEvens = 0;
+    for (size_t i = 0; i < size; ++i) {
+        if (arr[i] % 2 == 1) {
+ ++(*numOdds);
+ } else {
+ ++(*numEvens);
+ }
+ }
+ // Allocate two new arrays of the appropriate size.
+ *odds = new int[*numOdds];
+ *evens = new int[*numEvens];
+
+ // Copy the odds and evens to the new arrays.
+    size_t oddsPos = 0, evensPos = 0;
+    for (size_t i = 0; i < size; ++i) {
+        if (arr[i] % 2 == 1) {
+ (*odds)[oddsPos++] = arr[i];
+ } else {
+ (*evens)[evensPos++] = arr[i];
+ }
+ }
+}
+```
+
+dereference every pointer leads to some ugly syntax in the function body. Additionally, when you want to call separateOddsAndEvens(), you must pass the address of two pointers so that the function can change the actual pointers, and pass the address of two size_ts so that the function can change the actual size_ts. Note **also that the caller is responsible for deleting the two arrays created by separateOddsAndEvens()**!
+
+for using this function:
+```cpp
+int main(){
+    int unSplit[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    int* oddNums { nullptr };
+    int* evenNums { nullptr };
+    size_t numOdds { 0 }, numEvens { 0 };
+    separateOddsAndEvens(unSplit, std::size(unSplit),
+ &oddNums, &numOdds, &evenNums, &numEvens);
+ // Use the arrays...
+    delete[] oddNums; oddNums = nullptr;
+    delete[] evenNums; evenNums = nullptr;
+}
+```
+
+this syntax of writing the function may introduce some errors in case of being misused, now let's see the same function using references.
+
+```cpp
+void separateOddsAndEvens(const int arr[], size_t size, int*& odds,
+size_t& numOdds, int*& evens, size_t& numEvens)
+{
+ numOdds = numEvens = 0;
+    for (size_t i { 0 }; i < size; ++i) {
+        if (arr[i] % 2 == 1) {
+ ++numOdds;
+ } else {
+ ++numEvens;
+ }
+ }
+ odds = new int[numOdds];
+ evens = new int[numEvens];
+    size_t oddsPos { 0 }, evensPos { 0 };
+    for (size_t i { 0 }; i < size; ++i) {
+        if (arr[i] % 2 == 1) {
+            odds[oddsPos++] = arr[i];
+ } else {
+            evens[evensPos++] = arr[i];
+ }
+ }
+}
+```
+
+In this case, the odds and evens parameters are references to `int*`s. separateOddsAndEvens() can modify the `int*`s that are used as arguments to the function (through the reference), without any explicit dereferencing. The same logic applies to numOdds and numEvens, which are references to size_ts. With this version of the function, you no longer need to pass the addresses of the pointers or size_ts; the reference parameters handle it for you automatically:
+
+```cpp
+separateOddsAndEvens(unSplit, std::size(unSplit),
+oddNums, numOdds, evenNums, numEvens);
+```
+
+although using reference in dynamic arrays is much cleaner than using pointers, it is recommended to use `vector` where it is much more readable and safer that all memory deallocations occur automatically, hence the version of `separateOddsAndEvens` function with vectors will be:
+```cpp
+void separateOddsAndEvens(const vector<int>& arr,
+vector<int>& odds, vector<int>& evens)
+{
+    for (int i : arr) {
+        if (i % 2 == 1) {
+            odds.push_back(i);
+ } else {
+            evens.push_back(i);
+ }
+ }
+}
+```
+
+using it, note there aren't memory allocations and deallocations since it is made automatically by `vector` 
+```cpp
+vector<int> vecUnSplit { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+vector<int> odds, evens;
+separateOddsAndEvens(vecUnSplit, odds, evens);
+```
+
+to improve the function it is not advised to pass the output as an input parameter to the function, hence to return two vectors we can encapsulate them in a `struct` as follows:
+
+```cpp
+struct OddsAndEvens { vector<int> odds, evens; };
+OddsAndEvens separateOddsAndEvens(const vector<int>& arr)
+{
+ vector<int> odds, evens;
+    for (int i : arr) {
+        if (i % 2 == 1) {
+            odds.push_back(i);
+ } else {
+            evens.push_back(i);
+ }
+ }
+    return OddsAndEvens { .odds = odds, .evens = evens };
+}
+```
+
+#### Does Reference take memory?, the Disassembly will answer
+how references work in the background, the background here means the assembly code. by using the disassemblier tool we will trace how the reference works.
+
+I am using [godbolt](https://godbolt.org/) website, this is an online disassembler tool.
+
+before getting into assembly, some notes should be stated.
+
+1. An instruction in assembly language is a symbolic representation of a single-machine instruction. In its simplest form, an instruction consists of a mnemonic and a list of operands. Additional bytes may affect the action of the instruction or provide information about the data needed by the instruction
+
+2. comments are identified with `;` at its beginning
+
+3. on calling a function in C/C++, it is translated to a **subroutine**, before executing a subroutine some registers values will be pushed onto the stack to save it and free the registers to be used by the subroutine
+
+4. on returning from the subroutine, the stack will be popped and the pushed registers will be loaded with their values before executing the subroutine
+
+5. for getting a value from an address in assembly, this is done in different modes called [Addressing Modes](https://www.tutorialspoint.com/assembly_programming/assembly_addressing_modes.htm) we will be concerned with `Indirect Memory Addressing` in this example
+
+6. Indirect Memory Addressing is similar to pointer in C/C++, where a register is loaded by an address and the operation is to be done on the address in the register, not on a direct given address, hence its name Indirect Memory Addressing
+
+7. in this example we have two instructions we deal with
+    * MOV DEST, SRC <br>
+ this command copy data from SRC (register or memory address) to DEST (register or memory address)
+
+    * LEA DEST, SRC <br>
+ this macro loads the address not the value of the source to the destination, for example:<br>
+ ```armasm
+ LEA Ax, [BP-12] ; loads `BP-12` to Ax not the content in the address of [BP-12]
+ ```
+
+in the following example, a simple variable is defined:
+```cpp
+int fun(){
+    char a {'a'};
+    return 0 ;
+}
+```
+using `x86–64 gcc 14.1`, the x86 assembly will do the following:
+1. defining a subroutine equivalent to `fun`
+2. pushing states of registers to stack before executing the subroutine
+3. since we will define a local variable within a function, hence we are dealing with a stack frame, so all variables will take addresses with respect to the stack beginning address, the stack starting address is referenced by the `rbp` base pointer register
+4. mov `97` which is the ASCII code of `a` to the address of variable `a`
+5. return `0` from the subroutine function
+6. pop the registers from the stack and load their previous state
+these points are implemented in the following snippet:
+
+```armasm
+fun(): ;1 define the subroutine
+ ;2. pushing states of registers to stack before executing the subroutine
+ push    rbp
+ mov     rbp, rsp
+
+ ;3. defining the subroutine of the variable `a` in address rbp-9, where rbp holds the address of the beginning of the stack
+ ;4. move 97 to that address
+ mov     BYTE PTR [rbp-9], 97
+        
+        
+ ;5. return 0
+ mov     eax, 0
+
+ ;6. pop the registers from the stack and load their previous state
+ pop     rbp
+ ret
+```
+
+in the next snippet, I will define a new reference and check whether it will take place from the stack(memory) or not.
+
+```cpp
+int fun(){
+    char a {'a'};
+
+    char& aRef {a};
+    return 0 ;
+}
+```
+
+```armasm
+fun(): ;1
+ ;2
+ push    rbp
+ mov     rbp, rsp
+ ;3. 4.
+ mov     BYTE PTR [rbp-9], 97
+
+ ; new part
+ lea     rax, [rbp-9]
+ mov     QWORD PTR [rbp-8], rax
+        
+ ;5
+ mov     eax, 0
+ ;6
+ pop     rbp
+ ret
+```
+
+for the new part which corresponds to `char& aRef {a};`, it is noticed that the following points are implemented:
+1. load the register `rax` with the value `rbp-9` by using the command `lea`
+2. the value of `rbp-9` is the same as the value of variable `a`
+3. the value in `rax` which is `rbp-9`= the address of `a` is stored at a new place in the stack which is `rbp-8`
+
+can we consider the reference as a const pointer to `a` or this address (`rbp-8`) is used for something else? To answer this question let's modify the variable `a` using the reference and modifying it directly to see the mechanism of editing `rbp-9` memory location.
+
+
+
+```cpp
+int fun(){
+    char a {'a'};
+
+    char& aRef {a};
+
+ a = 'l'; 
+
+    return 0 ;
+}
+```
+
+```armasm
+fun():
+ push    rbp
+ mov     rbp, rsp
+ mov     BYTE PTR [rbp-9], 97
+ lea     rax, [rbp-9]
+ mov     QWORD PTR [rbp-8], rax
+
+ ;new part corresponds to a = 'l'; 
+ mov     BYTE PTR [rbp-9], 108
+
+ mov     eax, 0
+ pop     rbp
+ ret
+```
+
+as we can see an immediate loading of 108 (l) to the memory address of the variable `a`, now we will do the same using aRef.
+
+
+
+```cpp
+int fun(){
+    char a {'a'};
+
+    char& aRef {a};
+
+ a = 'l'; 
+    
+ aRef = 'z';
+
+    return 0 ;
+}
+```
+
+```armasm
+fun():
+fun():
+ push    rbp
+ mov     rbp, rsp
+ mov     BYTE PTR [rbp-9], 97
+ lea     rax, [rbp-9]
+ mov     QWORD PTR [rbp-8], rax
+ mov     BYTE PTR [rbp-9], 108
+
+ ;new part corresponding to aRef = 'z';
+ mov     rax, QWORD PTR [rbp-8]
+ mov     BYTE PTR [rax], 122
+        
+ mov     eax, 0
+ pop     rbp
+ ret
+```
+
+it is clear that the assignment of a through aRef is translated into two instructions, let's see what are these instructions:
+
+1. mov the value in the address ` [rbp-8]` which is the address of aRef and this value is the address of `a`. Note this `[]` represents the indirect memory addressing. the following table will visualize the memory and registers after this instruction is executed
+
+| variable | address | value   |
+|----------|---------|---------|
+| a        | [rbp-9] | l       |
+| aRef     | [rbp-8] | rbp-9 |
+
+
+| Register | value   |
+|----------|---------|
+| rax      | value in address [rbp-8] which is **rbp-9** | 
+
+2. load the address stored in rax (i.e. that is what mov BYTE PTR [rax] means) with `122` which is the ASCII code of `z`, since the address stored in rax is rbp-9 which is `a`, and since it is loaded via indirect addressing with `z`, then `a = z`
+
+we can conclude that :
+* reference takes space in memory
+* assigning values to a reference is translated into two instructions at the assembly level which are implicit pointer dereferencing and assignment of the dereferenced pointer 
+* any operation on reference at the C/C++ level involves pointer dereferencing and assignment, so we can't get the address of the reference at the C/C++ level.
+
+another prof that reference is a constant pointer, we can define a constant pointer and dereference it in the C++ level and trace its assembly
+
+```cpp
+int fun(){
+    char a {'a'};
+    char& aRef {a};
+ a = 'l'; 
+ aRef = 'z';
+
+    char* aPtr {&a};
+
+ *aPtr = 'd';
+
+    return 0 ;
+}
+```
+Note: addresses are changed from the previous example this is because of the tool.
+
+```armasm
+fun():
+ push    rbp
+ mov     rbp, rsp
+ mov     BYTE PTR [rbp-17], 97
+ lea     rax, [rbp-17]
+ mov     QWORD PTR [rbp-8], rax
+ mov     BYTE PTR [rbp-17], 108
+ mov     rax, QWORD PTR [rbp-8]
+ mov     BYTE PTR [rax], 122
+
+ ;the new part corresponds to char* aPtr {&a};
+ lea     rax, [rbp-17]
+ mov     QWORD PTR [rbp-16], rax
+
+ ; corresponds to char*  *aPtr = 'd';
+ mov     rax, QWORD PTR [rbp-16]
+ mov     BYTE PTR [rax], 100
+
+
+ mov     eax, 0
+ pop     rbp
+ ret
+```
+
+the logic of defining a pointer and dereference is the same as dealing with a reference.
+
+#### How Does reference to rValue/const ref works on Assembly Level
+
+**for rValues**:
+```cpp
+int fun(){
+    char&& aRef {'b'};
+    return 0 ;
+}
+```
+```armasm
+fun():
+ push    rbp
+ mov     rbp, rsp
+ ;1. create new variable at [rbp-9] and load it with 'b' = 98
+ mov     BYTE PTR [rbp-9], 98
+
+ ; create a new reference at [rbp-8] and load it with the address of the unnamed temp variable
+ lea     rax, [rbp-9]
+ mov     QWORD PTR [rbp-8], rax
+
+ mov     eax, 0
+ pop     rbp
+ ret
+```
+from the previous snippet, the following points are implemented:
+1. for creating an rValue reference, a temporary variable should be created in the memory at first
+
+2. creating a reference in memory (as discussed earlier) and reference to the new temporary variable address
+
+
+**for const unnmaed variables**:
+
+```cpp
+int fun(){
+    const int& constRef {1};
+    return 0 ;
+}
+
+```
+by using `x86–64 gcc 14.1`
+```armasm
+fun():
+ ; save register state before execution of the subroutine
+ push rbp
+ mov rbp, rsp
+ mov DWORD PTR [rbp-20], 1
+ lea rax, [rbp-20]
+ mov QWORD PTR [rbp-8], rax
+ mov eax, 0 ; return 0
+ ; load the register state before calling the subroutine
+ pop rbp
+ ret
+```
+the `const int& constRef {1};` is translated to three directives in assembly. these directives are:
+* moving `1` to a new address in the current stack frame (create a new local variable)
+* `lea` load effective address: `rax ← rbp-20`
+* creating a new pointer in the `rbp-8` address that points to the address in the `rax`
+
+so it is similar to creating a new object and a new pointer points to it.
+
+### 23- const_cast()
+as previously mentioned in [variables section](#4--variables), Variables can be converted to other types by casting them and introducing static_cast. `static_cast` is one of the 5-types of the cast in C++ which are:
+1. const_cast()
+2. static_cast()
+3. reinterpret_cast()
+4. dynamic_cast()
+5. std::bit_cast()
+
+in this section, the const_cast will be discussed
+
+const_cast can be used to :
+
+* cast the constant variable to be nonconstant (casting away constness)
+
+* cast the nonconstant variable to be constant (add
+const-ness)
+
+* const_cast can be used to change non-const class members inside a const member function
+
+#### casting away constness
+
+Theoretically, of course, there should be no need for a const cast. If a variable is const, it should stay const. In practice, however, you sometimes find yourself in a situation where: 
+a function that has a constant parameter that should be passed to a function that receives nonconstant arguments. and you are sure that this function will not modify the passed non-const argument.
+
+The “correct” solution would be to make const consistent in the program, but that is not always an option, especially if you are using third-party libraries. Thus, you sometimes need to cast away the const-ness of a variable, but again you should do this in case you are sure that the function you are calling will not modify the object; otherwise, there is no other option than to restructure your program. 
+
+```cpp
+void thirdPartyLibraryFunction(char* non_const_str);
+void f(const char* const_str)
+{
+    thirdPartyLibraryFunction(const_cast<char*>(const_str)); //remove the constness of the function of const_str
+}
+```
+#### change non const class members inside a const member function
+
+const member function is a member function that doesn't modify any member of its object, to modify a non-const member inside a const member function `const_cast` should be used, for example:
+
+```cpp
+class Simple 
+{ 
+private: 
+    int nonConstantVal; 
+public: 
+    void fun() const
+ { 
+        this->nonConstantVal = 10; //error, a constant member function can't edit member values
+
+ //cannot assign to non-static data member within const member function 'fun'
+ } 
+
+}; 
+```
+
+use `const_cast` to solve this issue, this adds contents to `this` inside the constant member function.
+
+```cpp
+
+class Simple 
+{ 
+private: 
+    int nonConstantVal; 
+public: 
+    void fun() const
+ { 
+ (const_cast<Simple*>( this) )->nonConstantVal = 10; //COMPILE
+
+ } 
+
+}; 
+
+```
+
+**Note**: `const_cast` is considered safer than simple type casting. It’s safer in the sense that the casting won’t happen if the type of cast is not the same as the original object.

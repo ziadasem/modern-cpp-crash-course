@@ -10,5 +10,6 @@ int main2(){
     std::cout << std::get<1>(t) << std::endl;
     std::cout << std::get<2>(t) << std::endl;
     return 0;
+    
 }
 
