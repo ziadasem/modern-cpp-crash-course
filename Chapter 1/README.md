@@ -12,14 +12,14 @@ A disscussion of the topics in this chapter with more information from different
 - [6- Conditional Statements and Logical Operators](#6--conditional-statements-and-logical-operators)
 - [7- Functions](#7--functions)
 - [8- Attributes](#8--attributes)
-- [9- C-Style Array, std::array, and vector](#9--cstyle-array-stdarray-and-vector)
+- [9- C-Style Array, std::array, and vector](#9--c-style-array-stdarray-and-vector)
 - [10- std::pair](#10--stdpair)
-- [11- std::optional and value_or](#11--stdoptional-and-valueor)
+- [11- std::optional and value_or](#11--stdoptional-and-value_or)
 - [12- std::tuple](#12--stdtuple)
 - [13-Structured Bindings](#13--structured-bindings)
 - [14- Loops](#14--loops)
-    - [continue vs break**](#continue-vs-break)
-    - [The Range-Based for Loop](#the-rangebased-for-loop)
+    - [continue vs break](#continue-vs-break)
+    - [The Range-Based for Loop](#the-range-based-for-loop)
 - [15- Initializer Lists](#15--initializer-lists)
 - [16- C++ as an Object Oriented Language](#16--c-as-an-object-oriented-language)
     - [Defining Classes](#defining-classes)
@@ -60,7 +60,7 @@ A disscussion of the topics in this chapter with more information from different
     - [Reference Parameters; Pass-by-Reference-to-const](#reference-parameters-passbyreferencetoconst)
     - [Reference Return Values](#reference-return-values)
     - [Deciding Between References and Pointers](#deciding-between-references-and-pointers)
-    - [Does Reference take memory?, the Disassembly will answer](#does-reference-take-memory-the-disassembly-will answer)
+    - [Does Reference take memory? the Disassembly will answer](#does-reference-take-memory-the-disassembly-will-answer)
     - [How Does reference to rValue/const ref works on Assembly Level](#how-does-reference-to-rvalueconst-ref-works-on-assembly-level)
 - [23- const_cast()](#23--constcast)
     - [casting away constness](#casting-away-constness)
@@ -1484,7 +1484,7 @@ int main(){
 ### 14- Loops
 in the book `while`, `do-while`, and `for` loops are discussed, this readme is not a comprehensive guide, so some points are shown for this section **(Loops)**.
 
-#### continue vs break**
+#### continue vs break
 
 The keyword **break** can be used within a loop to immediately get out of the loop and resume execution of the program starting at the line of code following the loop.
 
