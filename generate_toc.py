@@ -27,7 +27,7 @@ def generate_toc(headings):
     return toc
 
 def main():
-    file_path = 'chapter1/README.md' 
+    file_path = 'Chapter 1/README.md' 
     headings = extract_headings(file_path)
     toc = generate_toc(headings)
     for line in toc:

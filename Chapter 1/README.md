@@ -12,16 +12,29 @@ A disscussion of the topics in this chapter with more information from different
 - [6- Conditional Statements and Logical Operators](#6--conditional-statements-and-logical-operators)
 - [7- Functions](#7--functions)
 - [8- Attributes](#8--attributes)
-- [9- C-Style Array, std::array, and vector](#9--c-style-array-stdarray-and-vector)
+- [9- C-Style Array, std::array, and vector](#9--cstyle-array-stdarray-and-vector)
 - [10- std::pair](#10--stdpair)
-- [11-std::optional and value_or](#11-stdoptional-and-value_or)
-- [12-std::tuple](#12-stdtuple)
-- [13-Structured Bindings](#13-structured-bindings)
+- [11- std::optional and value_or](#11--stdoptional-and-valueor)
+- [12- std::tuple](#12--stdtuple)
+- [13-Structured Bindings](#13--structured-bindings)
 - [14- Loops](#14--loops)
+    - [continue vs break**](#continue-vs-break)
+    - [The Range-Based for Loop](#the-rangebased-for-loop)
 - [15- Initializer Lists](#15--initializer-lists)
-- [16- C++ as an Object-Oriented Language](#16--c-as-an-object-oriented-language)
+- [16- C++ as an Object Oriented Language](#16--c-as-an-object-oriented-language)
+    - [Defining Classes](#defining-classes)
+    - [Constructor and Destructor](#constructor-and-destructor)
+    - [Initialize members in constructors](#initialize-members-in-constructors)
+    - [Deleting members in destructor](#deleting-members-in-destructor)
+    - [Definitions of the class members](#definitions-of-the-class-members)
+    - [using class](#using-class)
 - [17- Scope Resolution](#17--scope-resolution)
+    - [unnamed namespace and the global namespace](#unnamed-namespace-and-the-global-namespace)
 - [18- Uniform Initialization](#18--uniform-initialization)
+    - [consistent syntax for initializing different types of objects](#consistent-syntax-for-initializing-different-types-of-objects)
+    - [zero-initialization of variables](#zeroinitialization-of-variables)
+    - [prevents narrowing](#prevents-narrowing)
+    - [initializer to initialize arrays that are members of a class](#initializer-to-initialize-arrays-that-are-members-of-a-class)
 - [19- Designated Initializers](#19--designated-initializers)
 - [20- Pointers and Dynamic Memory](#20--pointers-and-dynamic-memory)
     - [Stack](#stack)
@@ -37,22 +50,33 @@ A disscussion of the topics in this chapter with more information from different
     - [const with Pointers](#const-with-pointers)
     - [const to Protect Parameters](#const-to-protect-parameters)
     - [const Member Functions](#const-member-functions)
-
-
 - [22- References](#22--references)
     - [Reference Variables](#reference-variables)
-    - [Reference Variables; References to a const variable](#reference-variables-references-to-a-const-variable)
+    - [Reference Variables; References to a const variable](#reference-variables-references-to-a-const-variable)   
     - [Reference Variables; References to Pointers and Pointers to References](#reference-variables-references-to-pointers-and-pointers-to-references)
     - [Reference Variables; Structured Bindings and References](#reference-variables-structured-bindings-and-references)
     - [Reference Data Members](#reference-data-members)
     - [Reference Parameters](#reference-parameters)
-    - [Reference Parameters; Pass-by-Reference-to-const](#reference-parameters-pass-by-reference-to-const)
+    - [Reference Parameters; Pass-by-Reference-to-const](#reference-parameters-passbyreferencetoconst)
     - [Reference Return Values](#reference-return-values)
     - [Deciding Between References and Pointers](#deciding-between-references-and-pointers)
-    - [Does Reference take memory? the Disassembly will answer](#does-reference-take-memory-the-disassembly-will-answer)
-- [23- const_cast()](#23--const_cast)                                                                                             
+    - [Does Reference take memory?, the Disassembly will answer](#does-reference-take-memory-the-disassembly-will answer)
+    - [How Does reference to rValue/const ref works on Assembly Level](#how-does-reference-to-rvalueconst-ref-works-on-assembly-level)
+- [23- const_cast()](#23--constcast)
     - [casting away constness](#casting-away-constness)
-    - [change non-const class members inside a const member function](#change-non-const-class-members-inside-a-const-member-function)               
+    - [change non const class members inside a const member function](#change-non-const-class-members-inside-a-const-member-function)
+- [24- Exceptions](#24--exceptions)
+    - [Syntex of try-catch](#syntex-of-trycatch)
+    - [The Flow of the try-catch block](#the-flow-of-the-trycatch-block)
+- [25- Type Aliases](#25--type-aliases)
+- [26- typedefs](#26--typedefs)
+- [27- Type Inference](#27--type-inference)
+    - [The auto Keyword](#the-auto-keyword)
+    - [The auto Keyword; The auto& Syntax](#the-auto-keyword-the-auto-syntax)
+    - [The auto Keyword; The auto* Syntax](#the-auto-keyword-the-auto-syntax)
+    - [The auto Keyword; Copy List vs. Direct List Initialization](#the-auto-keyword-copy-list-vs-direct-list-initialization)
+    - [The decltype Keyword](#the-decltype-keyword)
+- [28- The Standard Library](#28--the-standard-library)              
 
 **C vs C++**
 
@@ -1271,7 +1295,7 @@ int main(){
 ```
 **NOTE** *While you could write a function returning an std::pair, it is recommended to write a small struct or class containing the two values and return that from the function. The downside of returning a pair is that **client code must be used first and second to access the two values. By returning a proper struct or class, you can give more meaningful names to the two values**.*
 
-### 11-std::optional and value_or
+### 11- std::optional and value_or
 std::optional, defined in <optional>, hold a value of a specific type, or nothing. 
 optional can be used in :
  - to make a parameter of a function optional 
@@ -1345,7 +1369,7 @@ std::cout << "value is "<< withoutValue.value_or(-1)  << "\n";
 You cannot store a reference (discussed later in this readme) in an optional, so optional<T&> does
 not work. Instead, you can store a pointer in an optional.
 
-### 12-std::tuple
+### 12- std::tuple
 A tuple is an object that can hold several elements. The elements can be of different data types. The elements of tuples are initialized as arguments in the order in which they will be accessed. std::pair can only have two values - not zero, one, three, or more. TWO values. A tuple, however, has almost no semantic limitation on the number of values. An std::pair, therefore, is a more accurate, type-safe type to use if you actually want to specify a pair of values.
 
 **to set values for a tuple use `make_tuple`, or `()` as following:**
@@ -1388,7 +1412,7 @@ c
 
 [more](https://www.geeksforgeeks.org/tuples-in-c/)
 
-### 13-Structured Bindings
+### 13- Structured Bindings
 A structured binding allows you to declare multiple variables that are initialized with elements from a
 data structure such as an array, struct, or pair.
 
@@ -1460,14 +1484,14 @@ int main(){
 ### 14- Loops
 in the book `while`, `do-while`, and `for` loops are discussed, this readme is not a comprehensive guide, so some points are shown for this section **(Loops)**.
 
-**continue vs break**
+#### continue vs break**
 
 The keyword **break** can be used within a loop to immediately get out of the loop and resume execution of the program starting at the line of code following the loop.
 
 The keyword **continue** can be used to return to the top of the loop and reevaluate the while expression. However, using continue
 in loops is often considered **poor style because it causes the execution of a program to jump around somewhat haphazardly**, so use it sparingly.
 
-**The Range-Based for Loop**
+#### The Range-Based for Loop
 
 The range-based for loop allows  easy iteration over elements
 of a container. This type of loop works for 
@@ -1518,7 +1542,7 @@ OOP is a big interesting topic with theories, concepts, and best practices indep
 Classes,”  in the book).
 this section is intended to show basic C++ object syntax if you already know the theory of OOP.
 
-**Defining Classes**
+#### Defining Classes
 
 A class defines the characteristics of an object. In modern C++, classes are usually defined and exported from
 a module interface file (.cppm), while their definitions can either be directly in the same module interface file or in a corresponding module implementation file (.cpp). or in defined in a header file and implemented in .cpp files.
@@ -1583,7 +1607,7 @@ private:
 
 it is noticed that the convention to prefix each data member of a class with a lowercase m followed by an underscore, such as m_passengerName is followed. 
 
-**Constructor and Destructor**
+#### Constructor and Destructor
 
 The member function that has the same name as the class with no return type is a constructor. It is automatically called when an object of the class is created.
 
@@ -1599,7 +1623,7 @@ public:
 ...
 ```
 
-**Initialize members in constructors**
+#### Initialize members in constructors
 c++ provides three methods:
 * implement inside the class constructor in the same file
 
@@ -1637,7 +1661,7 @@ If your class additionally needs to perform some other types of initializations,
 file, allocating memory, and so on, then write a constructor to handle those initializations.
 
 
-**Deleting members in destructor**
+#### Deleting members in destructor
 
 Destructors are required if you need to perform some cleanup,
 such as closing files, and freeing memory but usually destructor doesn’t do anything and can simply be removed from this class unless what is mentioned.
@@ -1651,7 +1675,7 @@ AirlineTicket::~AirlineTicket()
 }
 ```
 
-**Definitions of the class members**
+#### Definitions of the class members
 as in a constructor, it can be defined within the class or outside the class.
 
 **outside the class**
@@ -1705,7 +1729,7 @@ private:
 };
 ```
 
-**using class**
+#### using class
 the code that uses the class called the client code, to define a class, includes the header file.
 
 ```cpp
@@ -3114,3 +3138,664 @@ public:
 ```
 
 **Note**: `const_cast` is considered safer than simple type casting. It’s safer in the sense that the casting won’t happen if the type of cast is not the same as the original object.
+
+### 24- Exceptions
+
+C++ is a flexible language, but it allows doing unsafe things. For example, the compiler will let you write code that scribbles on random memory addresses or tries to divide by zero (computers don’t deal well with infinity). or during the normal flow of the program, an Exceptional condition may occur, such as the following scenarios.
+for example: a program that retrieves data from the internet, the following conditions are unexpected in the normal flow and break the normal flow:
+* no internet connection
+* the source of the data is not available (the server is down)
+* the requested data is not available
+* and so on
+or another program that deals with files, here are some exceptions:
+* file not found
+* file is opened by another program
+* file has no read permissions
+
+All of these conditions and the unsafe instructions cause the normal flow to break, hence these conditions are exceptional, so these types of errors are called Exceptions. An exception is an exceptional situation, that is, a situation that you don’t expect or want in the normal flow of execution of a program.
+
+to handle these errors a function may return nullptr or error code, but C++ provides a better mechanism which is Exception.
+
+for example, consider the following function:
+```cpp
+double divideNumbers(double numerator, double denominator)
+{
+    return numerator / denominator;
+}
+```
+```cpp
+#include <iostream>
+int main(){
+    std::cout<< divideNumbers(10, 1) <<std::endl; //1
+    int* ptr {nullptr};
+    std::cout<< divideNumbers(10, *ptr)  <<std::endl; //crashes
+    std::cout<< divideNumbers(10, 2)<<std::endl; //never executed
+}
+```
+
+**Output**
+```
+10
+```
+
+re-designing the function to handle this input by returning error codes or nullptr, may make the code more complex, instead implementing with `throw` keyword and surrounding the function with the `try-catch` block will make the code simpler. 
+
+**The code with error codes**:
+
+
+```cpp
+#include <iostream>
+
+enum class ErrorCodes {
+    NoError = 0,
+    DivisionByZero = -1,
+    InvalidInput = -2,
+};
+
+void handleError(ErrorCodes& error, double value);
+
+
+
+double divideNumbers(double numerator, double denominator, ErrorCodes& error)
+{   
+    if (denominator == 0){
+ error = ErrorCodes::DivisionByZero;
+        return 0 ;
+ }
+    return numerator / denominator;
+}
+
+int main(){
+ ErrorCodes error = ErrorCodes::NoError;
+    double value ;
+ value =  divideNumbers(10, 1, error) ;
+    handleError(error, value);
+        
+    divideNumbers(10, 0, error);
+    handleError(error, value);
+
+}
+
+void handleError(ErrorCodes& error, double value){
+    switch(error){
+            case ErrorCodes::DivisionByZero:
+                std::cout<<"Division by zero is not allowed"<<std::endl;
+ error = ErrorCodes::NoError;
+                break;
+            case ErrorCodes::InvalidInput:
+                std::cout<<"Invalid input"<<std::endl;
+ error = ErrorCodes::NoError;
+                break;
+            case ErrorCodes::NoError:
+                std::cout<<value<<std::endl;
+                break;
+ }
+}
+```
+
+the program is modified by the following:
+* Since the function returns a value, we need another variable to handle the error output
+* error codes are hard to interpret by developers if they are interpreted as integers so an enum is created to give meaning to the integer values of the error
+* We need a handler to output the error based on the error value, instead of repeating the switch statement, a function is created to handle the errors
+
+as shown many modifications are introduced, although there are more efficient ways to handle the errors, these ways are not standardized for all programs (i.e. depending on the experience of the developer), hence we will use a try-catch statement.
+
+```cpp
+#include <iostream>
+#include <stdexcept>
+
+double divideNumbers(double numerator, double denominator)
+{   
+    if (denominator == 0){
+        throw std::invalid_argument { "Division by zero is not allowed" } ;
+ }
+    return numerator / denominator;
+}
+
+int main(){
+    try{
+        std::cout << divideNumbers(10, 1) <<std::endl;
+        std::cout << divideNumbers(10, 0) <<std::endl;
+
+ }catch(const std::exception& e){
+        std::cout << e.what() << std::endl;
+ }
+
+}
+
+```
+
+the modifications are less than in the previous snippet, here are the modifications(the syntax of try-catch will be discussed after a few lines):
+* surrounding the block that may return an error with a `try { }` block, and follow it by a `catch(){ }` block
+* inside the catch block print `e.what()` which returns the error message
+
+as shown no extra enums or arguments are created, no need for a switch case to print the exact error message, also try-catch statement is a standard statement that is implemented in the same way.
+
+#### Syntex of try-catch
+
+in the first snippet (without try-catch), we faced an error of returning two variables (the error and the required variable). the keyword `throw` can be viewed as a special return that returns `errors` only (which are called exceptions). Since throw returns errors it should be received by a catch block, or else the program will terminate.
+
+#### The Flow of the try-catch block
+as return keyword, `throw` keyword ends the function (i.e. no lines will be executed after it), consider the following example:
+```cpp
+#include <iostream>
+
+void a(){
+    std::cout<<"1"<<std::endl;
+    std::cout<<"2"<<std::endl;
+    std::cout<<"3"<<std::endl;
+    throw std::invalid_argument {"error message"};
+    std::cout<<"4"<<std::endl;
+}
+
+void b(){
+    try{
+        std::cout<<"5"<<std::endl;
+        a();
+        std::cout<<"6"<<std::endl;
+ }catch(const std::exception& e){
+        std::cout<<"7"<<std::endl;
+        std::cout << e.what() << std::endl;
+ }
+    std::cout<<"8"<<std::endl;
+}
+
+int main(){
+    b();
+}
+```
+
+the execution of the program will be:
+
+```cpp
+int main(){
+    b()
+```
+calls `b()`
+```cpp
+void b(){
+    try{
+        std::cout<<"5"<<std::endl;
+        a();
+```
+
+prints:
+```
+5
+```
+then calls `a()`
+
+
+```cpp
+void a(){
+    std::cout<<"1"<<std::endl; //done
+    std::cout<<"2"<<std::endl; //done
+    std::cout<<"3"<<std::endl; //done
+    throw std::invalid_argument {"error message"}; //(terminate the function and return with an exception)
+
+    std::cout<<"4"<<std::endl; //(not executed)
+}
+```
+
+prints:
+```
+5
+1
+2
+3
+```
+
+return to `b()` with an exception, not a value
+
+```cpp
+void b(){
+    try{--→ --→ --→ --→ --→ --→ --→ --→
+    ↑    std::cout<<"5"<<std::endl;   ↓ 
+    ←- ←-a(); /*exception*/           ↓
+ (/*ignore lines */)                  ↓
+                                      }catch (
+```
+
+since a() returned with an exception to its caller, the caller (`b()`) should **catch** this exception and since the calling of `a()` is surrounded with a `try-catch` block, it will **jump** to the catch block and ignore all other lines under `a()`
+
+```cpp
+void b(){
+    try{
+ //..... (lines are ignored)
+ }catch(const std::exception& e){
+        std::cout<<"7"<<std::endl; ;
+        std::cout << e.what() << std::endl;
+ }
+    std::cout<<"8"<<std::endl;
+}
+```
+outputs:
+```
+5
+1
+2
+3
+7
+```
+`b()` will print the `7` and execute ` e.what()` which returns the error message defined in the throw statement (i.e. here `throw std::invalid_argument {"error message"};`)  and finishes the `catch` block, then it will print `8` and  return to `main` function
+```
+5
+1
+2
+3
+7
+error message
+8
+```
+
+**What if calling of a() wasn't surrounded by a try/catch block**
+consider the following modification for the previous statement
+
+```cpp
+#include <iostream>
+
+void a(){
+    std::cout<<"1"<<std::endl;
+    std::cout<<"2"<<std::endl;
+    std::cout<<"3"<<std::endl;
+    throw std::invalid_argument {"error message"};
+    std::cout<<"4"<<std::endl;
+}
+
+void b(){
+ //remove try-catch block
+    std::cout<<"5"<<std::endl;
+    a();
+    std::cout<<"6"<<std::endl;
+    std::cout<<"8"<<std::endl;
+}
+
+int main(){
+    try{ //set the try-catch here
+        b();
+        std::cout<<"7"<<std::endl;
+ }catch(const std::exception& e){
+        std::cout<<"8"<<std::endl;
+        std::cout << e.what() << std::endl;
+ }
+    std::cout<<"9"<<std::endl;
+}
+```
+the surronded calling of `a()` within `b()` is moved to the main function, hence b() will not catch the exception from `a()`. what will happen? 
+
+>**If a function doesn't catch an exception it will rethrow it to its caller function, and the caller function will catch it or rethrow it again up to the main function if the main function doesn't catch it, the program will terminate**
+
+the execution will be:
+
+```cpp
+int main(){
+    try{
+        b();
+```
+calls `b()`
+```cpp
+void b(){
+    std::cout<<"5"<<std::endl;
+    a();
+```
+
+prints:
+```
+5
+```
+then calls `a()`
+
+
+```cpp
+void a(){
+    std::cout<<"1"<<std::endl; //done
+    std::cout<<"2"<<std::endl; //done
+    std::cout<<"3"<<std::endl; //done
+    throw std::invalid_argument {"error message"}; //(terminate the function and return with an exception)
+
+    std::cout<<"4"<<std::endl; //(not executed)
+}
+```
+
+prints:
+```
+5
+1
+2
+3
+```
+
+return to `b()` with an exception, not a value
+
+```cpp
+void b(){
+ ↑
+ ↑   std::cout<<"5"<<std::endl;  
+ ←- a(); /*exception*/           
+ (/*ignore lines */)          
+```
+
+`b()` should catch the exception, but it didn't so it will throw the exception to the caller function which is `main()`, and ignore other lines.
+
+
+```cpp
+int main(){
+    try{--→ --→ --→ --→ --→ --→ --→ --→
+    ↑                                 ↓
+    ← ← ←b();                         ↓
+         std::cout<<"7"<<std::endl;   ↓
+                                     }catch(const std::exception& e){
+                                        std::cout<<"8"<<std::endl;
+                                        std::cout << e.what() <<std::endl;
+ }
+    std::cout<<"9"<<std::endl;
+    return 0;
+}
+```
+prints:
+```
+5
+1
+2
+3
+8
+error message
+9
+```
+
+**No catch block in the callers stack**
+
+```cpp
+#include <iostream>
+
+void a(){
+    std::cout<<"1"<<std::endl;
+    std::cout<<"2"<<std::endl;
+    std::cout<<"3"<<std::endl;
+    throw std::invalid_argument {"error message"};
+    std::cout<<"4"<<std::endl;
+}
+
+void b(){
+    std::cout<<"5"<<std::endl;
+    a();
+    std::cout<<"6"<<std::endl;
+    std::cout<<"8"<<std::endl;
+}
+
+int main(){
+    b();
+    std::cout<<"7"<<std::endl;
+}
+```
+
+```
+5
+1
+2
+3
+terminate called after throwing an instance of 'std::invalid_argument'
+ what():  error message
+```
+
+### 25- Type Aliases
+an alias is another name for something, and for type aliases, it provides a new name for an existing type declaration, while you can use the old name.
+
+Type aliases were introduced in C++11. Before C++11, typedefs were being used (discussed in the next section).
+
+for example, for pointers to integers:
+```cpp
+using IntPtr = int*;
+```
+the typename is `int*` and the new additional name (type alias) is `IntPtr`.
+
+```cpp
+int main(){
+    using IntPtr = int*;
+    int* p1;
+ IntPtr p2;
+
+ //Variables created with the new type name are completely compatible with those created with the original type declaration
+ p1 = p2;
+ p2 = p1;
+}
+```
+
+The most common use for type aliases is to provide manageable names when the real type declarations become too indescriptive. This situation commonly arises with templates. An example from the Standard Library itself is std::basic_string<T> to represent strings. It’s a class template where T is the type of each character in the string, for example, char. You have to specify the template type parameter any time you want to refer to such a type.
+
+For declaring a string variables, , you would have to write basic_string<char>:
+```cpp
+void processVector(const vector<basic_string<char>>& vec) { /* omitted */ }
+int main()
+{
+vector<basic_string<char>> myVector;
+processVector(myVector);
+}
+```
+Since basic_string<char> is used that frequently, the Standard Library provides the following type alias as a shorter, more meaningful name:
+using string = basic_string<char>;
+
+using this alias:
+```cpp
+void processVector(const vector<string>& vec) { /* omitted */ }
+int main()
+{
+vector<string> myVector;
+processVector(myVector);
+}
+```
+
+### 26- typedefs
+
+since type aliases were introduced in C++11. legacy code bases still have typedefs, so `typedef` is explained. typedef is the same as type alias except the order of definitions. for example:
+
+```cpp
+using IntPtr = int*; //typealias
+typedef int* IntPtr; //typedef
+```
+both are the same thing except the type alias is more readable, but Type aliases and typedefs are not entirely equivalent, though. Compared to typedefs, type aliases are more powerful when used with templates, this topic is covered in the book in chapter 12.
+
+
+### 27- Type Inference
+
+Type Inference refers to automatic deduction of the data type of an expression in a programming language. introduced in C++11, before that each data type needed to be explicitly declared at compile-time, limiting the values of an expression at runtime but after the new version of C++, introduced two new keywords that support type inference which are `auto` and `decltype` which allows a programmer to leave the type deduction to the compiler itself. 
+
+With type inference capabilities, we can spend less time having to write out things the compiler already knows. As all the types are deduced in the compiler phase only, the time for compilation increases slightly but it does not affect the run time of the program.
+
+#### The auto Keyword
+The auto keyword has several different uses:
+1. To deduce a function’s return type, as explained earlier
+2. To define structured bindings, as explained earlier
+3. To deduce the type of an expression, as discussed earlier
+4. To deduce the type of non-type template parameters; discussed in Chapter 12
+5. To define abbreviated function templates; discussed in Chapter 12
+6. To use with decltype(auto); discussed in Chapter 12
+7. To write functions using the alternative function syntax; discussed in Chapter 12
+8. To write generic lambda expressions; discussed in Chapter 19
+
+auto can be used to let the compiler deduce the type of a variable at compile time without being explicitly defined by the programmer. The following statement shows the simplest use of the auto keyword in that context:
+
+```cpp
+auto x { 123 }; // x is of type int.
+```
+of course, the previous use-case isn't the main advantage of the auto keyword, the following are some of its advantages and use cases:
+* if a function has complicated return, If you want to assign the result of calling getFoo() to a variable, you can spell out the complicated type, or you can simply use auto and let the compiler figure it out
+ ```cpp
+    int**& func(){}
+    int main(){
+        auto f = func();
+    }
+ ```
+* by using `auto`, a return type of a function can be easily changed without updating all the places in the code where that function is called
+
+#### The auto Keyword; The auto& Syntax
+auto keyword is a handy keyword except for one issue that auto does which is *Using auto to deduce the type of an expression removes reference and const qualifiers.*, in other words, auto substitutes the types only without any qualifiers such as `const, &` for example:
+
+```cpp
+int main(){
+    const int value {3};
+    const int& valueRef {value};
+    auto valueRefRef {valueRef};
+
+ valueRef = 5 ; //error since it is constant
+ valueRefRef  = 5 ; //no errors
+}
+```
+
+```cpp
+valueRef = 5 ; //error since it is constant
+valueRefRef  = 5 ; //no errors
+```
+the `valueRef = 5 ;` issues an error since we modify a constant value, but for `valueRefRef  = 5 ;` the compiler didn't issue an error since the `auto` keyword removed the constant qualifier from the `value` variable, **but does it means that auto made variable inconstant?**, NO, auto makes a new copy from the referenced variable, see the example after modification:
+```cpp
+#include <iostream>
+int main(){
+    const int value {3};
+    const int& valueRef {value};
+    auto valueRefRef {valueRef};
+
+ //valueRef = 5 ; //error since it is constant
+ valueRefRef  = 10 ; //no errors
+
+    std::cout<<value<<std::endl;
+    std::cout<<valueRefRef<<std::endl;
+}
+```
+```
+3
+10
+```
+
+`valueRefRef` is changed but `value` isn't, hence valueRefRef is not a reference to a value.
+
+to solve this issue use `const auto&` or `auto&` according to the required case.
+ 
+consider the following example:
+```cpp
+int main(){
+    int val{3};
+    int& valRef {val};
+    auto& valRefRef {valRef};
+
+ valRefRef = 10;
+    std::cout<<val<<std::endl;
+}
+```
+```
+10
+```
+
+using `const auto` :
+
+
+```cpp
+int main(){
+    const int const_val{3};
+    const auto const_val_ref {val};
+ const_val = 12 ; //error
+}
+```
+
+
+WARNING Always keep in mind that auto strips away reference and const
+qualifiers and thus creates a copy! If you do not want a copy, use auto& or const auto&.
+
+#### The auto Keyword; The auto* Syntax
+auto keyword can deduce pointers as the following example:
+```cpp
+int main(){
+    int i { 123 };
+    auto p { &i }; //same as int* p {&i}
+ *p = 189;
+}
+```
+```
+0x57cd5ff714
+0x57cd5ff714
+189
+```
+However, when working with pointers, it is recommended to use the `auto*` syntax for the following reasons:
+* it is more readable since it clearly states that pointers are involved
+ ```cpp
+    auto* p { &i };
+ ```
+* using `auto*` resolves the strange behavior when using `auto`, const, and pointers together. Suppose you write the following:
+ ```cpp
+    const auto p1 { &i };
+ ```
+ is it const int* p1 or int* const p1? It is int* const p1 which is a constant pointer to nonconstant int, so most of the time, this syntax is not doing what is expected to do!
+
+ the previous syntax is read as a pointer to constant int, although it is not behaving like this, using `auto*`, solves this issue and increases the readability.
+
+ ```cpp
+        const auto* p3 { &i }; // resolves to const int* p3 {&i};
+        const auto p4 { &i }; // resolves to  int* const p4 {&i};
+        auto* const p5 { &i }; // resolves to  int* const p5 {&i};
+ ```
+
+#### The auto Keyword; Copy List vs. Direct List Initialization
+using uniform initializer `{}` with `auto` can introduce some bugs that should be avoided, in this section the source of these bugs is introduced.
+Two types of initializations use braced initializer `{}` lists:
+* Copy list initialization: `T obj = {arg1, arg2, ...};`
+* Direct list initialization: `T obj {arg1, arg2, ...};`
+
+In combination with auto-type deduction, there is an important difference between copy- and direct list initialization. Here is an example:
+```cpp
+int main(){
+ // Copy list initialization
+    auto a = { 11 }; // initializer_list<int>
+    auto b = { 11, 22 }; // initializer_list<int>
+    
+ // Direct list initialization
+    auto c { 11 }; // int
+    auto d { 11, 22 }; // Error, too many elements
+}
+```
+
+#### The decltype Keyword
+
+The decltype keyword which stands for **declared type** takes an expression as an argument and computes the type of that expression, as
+shown here:
+```cpp
+int x { 123 };
+decltype(x) y { 456 };
+```
+In this example, the compiler deduces the type of y to be int because that is the type of x.
+
+The difference between auto and decltype is that **decltype does not remove reference and const qualifiers.** consider the following example:
+
+```cpp
+#include <iostream>
+int main(){
+
+ //1- using decltype with references
+
+    int val{3};
+    int& valRef {val};
+    decltype(valRef)  valRefRef {valRef};//returns int&
+
+ valRefRef = 10;
+    std::cout<<val<<std::endl;
+
+ //2- using decltype with const references
+    const int const_val{3};
+    const int& const_val_ref {val};
+    decltype(const_val_ref)  const_val_ref_ref {const_val_ref};
+ const_val_ref_ref = 12 ; //error constant value
+
+}
+```
+
+```
+10
+```
+
+At first sight, decltype doesn’t seem to add much value. However, it is powerful in the context of templates, discussed in Chapters 12 and 26 of the book.
+
+
+### 28- The Standard Library
+C++ comes with a Standard Library, which contains a lot of useful heavily tested, and optimized classes that can readily be used in your code. you don’t need to waste time on implementing things that have already been implemented for you.
+
+A lot of functionality is provided by the Standard Library. Chapters 16 to 24 in the book provide more details; however, when you start working with C++, it is good to have an idea of what the Standard Library can do for you from the beginning. This is especially important if you are a C programmer. As a C programmer, you might try to solve problems in C++ the same way you would solve them in C, but in C++ there is probably an easier and safer solution to the problem that involves using **Standard Library classes**.
+
+That is the reason why the book already introduces some Standard Library classes, such as `std::string`, `array`, `vector`, `pair`, `optional`, and `tuple`. Many more classes are introduced in Chapters 16 to 24 in the book.
