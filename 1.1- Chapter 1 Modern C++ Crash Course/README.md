@@ -1,5 +1,5 @@
 
-# Notes from Chaptr 1:&nbsp;&nbsp;A Crash Course in C++ and the Standard Library
+# Chapter 1:&nbsp;&nbsp;A Crash Course in C++ and the Standard Library
 
 A disscussion of the topics in this chapter with more information from different resources and more topics are added.
 
@@ -2768,9 +2768,9 @@ OddsAndEvens separateOddsAndEvens(const vector<int>& arr)
 ```
 
 #### Does Reference take memory?, the Disassembly will answer
-how references work in the background, the background here means the assembly code. by using the disassemblier tool we will trace how the reference works.
+How do references work under the hood? Let's use a disassembler to explore their assembly code behavior!
 
-I am using [godbolt](https://godbolt.org/) website, this is an online disassembler tool.
+I am using [godbolt](https://godbolt.org/) website, which is an online disassembler tool.
 
 before getting into assembly, some notes should be stated.
 
@@ -2786,17 +2786,18 @@ before getting into assembly, some notes should be stated.
 
 6. Indirect Memory Addressing is similar to pointer in C/C++, where a register is loaded by an address and the operation is to be done on the address in the register, not on a direct given address, hence its name Indirect Memory Addressing
 
-7. in this example we have two instructions we deal with
-    * MOV DEST, SRC <br>
- this command copy data from SRC (register or memory address) to DEST (register or memory address)
+7. in this example, we have two instructions we deal with
 
-    * LEA DEST, SRC <br>
- this macro loads the address not the value of the source to the destination, for example:<br>
+    * MOV DEST, SRC <br>
+    this command copy data from SRC (register or memory address) to DEST (register or memory address)
+
+    * LEA DEST, SRC <br>
+    this macro loads the address not the value of the source to the destination, for example:<br>
  ```armasm
  LEA Ax, [BP-12] ; loads `BP-12` to Ax not the content in the address of [BP-12]
  ```
 
-in the following example, a simple variable is defined:
+The following example will show how a simple variable definition in C++ is translated to assembly:
 ```cpp
 int fun(){
     char a {'a'};
@@ -2864,7 +2865,7 @@ fun(): ;1
 for the new part which corresponds to `char& aRef {a};`, it is noticed that the following points are implemented:
 1. load the register `rax` with the value `rbp-9` by using the command `lea`
 2. the value of `rbp-9` is the same as the value of variable `a`
-3. the value in `rax` which is `rbp-9`= the address of `a` is stored at a new place in the stack which is `rbp-8`
+3. move the value in `rax` which is `rbp-9` (the address of the variable `a` ) to a new place in the stack which is `rbp-8`
 
 can we consider the reference as a const pointer to `a` or this address (`rbp-8`) is used for something else? To answer this question let's modify the variable `a` using the reference and modifying it directly to see the mechanism of editing `rbp-9` memory location.
 
@@ -2937,7 +2938,7 @@ fun():
 
 it is clear that the assignment of a through aRef is translated into two instructions, let's see what are these instructions:
 
-1. mov the value in the address ` [rbp-8]` which is the address of aRef and this value is the address of `a`. Note this `[]` represents the indirect memory addressing. the following table will visualize the memory and registers after this instruction is executed
+1. mov the value in the address ` [rbp-8]` which is the address of aRef and this value is the address of `a` to `rax`. Note this `[]` represents the indirect memory addressing. the following table will visualize the memory and registers after this instruction is executed
 
 | variable | address | value   |
 |----------|---------|---------|
