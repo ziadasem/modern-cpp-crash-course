@@ -1536,18 +1536,14 @@ int c { sum({ 1, 2, 3.0 }) };
 ```
 
 ### 16- C++ as an Object Oriented Language
-If you are a C programmer, you may have viewed the features covered so far in this chapter as convenient additions to the C language. As the name C++ implies, in many ways the language is just
-a “better C.” There is one major point that this view overlooks: unlike C, C++ is an object-oriented language. Object-oriented programming (OOP) is a different, arguably more natural, way to write code. 
-OOP is a big interesting topic with theories, concepts, and best practices independent of a programming language (i.e. the concepts can be applied to any programming language that supports OOP). hence it can't be covered in just a section of a summary of a chapter, but it will be covered further in another chapter (Chapter 5, “Designing with
-Classes,”  in the book).
+If you are a C programmer, you may have viewed the features covered so far in this chapter as convenient additions to the C language. As the name C++ implies, in many ways the language is just a “better C.” There is one major point that this view overlooks: unlike C, C++ is an object-oriented language. Object-oriented programming (OOP) is a different, arguably more natural, way to write code. 
+OOP is a big interesting topic with theories, concepts, and best practices independent of a programming language (i.e. the concepts can be applied to any programming language that supports OOP). hence it can't be covered in just a section of a summary of a chapter, but it will be covered further in another chapter (Chapter 5, “Designing with Classes,”  in the book), also in the practice part of this chapter (`Practice-part Chapter 1; YOUR FIRST BIGGER C++ PROGRAM`) an OOP project is introduced and explained.
 this section is intended to show basic C++ object syntax if you already know the theory of OOP.
 
 #### Defining Classes
 
-A class defines the characteristics of an object. In modern C++, classes are usually defined and exported from
-a module interface file (.cppm), while their definitions can either be directly in the same module interface file or in a corresponding module implementation file (.cpp). or in defined in a header file and implemented in .cpp files.
-A basic class definition for an airline ticket class is shown in the following example. The class can calculate the price of the ticket based on the number of miles on the flight and whether the customer is
-a member of the Elite Super Rewards Program.
+A class defines the characteristics of an object. In modern C++, classes are usually defined and exported from a module interface file (.cppm), while their definitions can either be directly in the same module interface file or in a corresponding module implementation file (.cpp). or in defined in a header file and implemented in .cpp files.
+A basic class definition for an airline ticket class is shown in the following example. The class can calculate the price of the ticket based on the number of miles on the flight and whether the customer is a member of the Elite Super Rewards Program.
 
 The definition begins by declaring the class name after the keyword `class`. 
 ```cpp

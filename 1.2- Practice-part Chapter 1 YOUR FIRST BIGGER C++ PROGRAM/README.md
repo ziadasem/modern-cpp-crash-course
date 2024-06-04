@@ -1,0 +1,5 @@
+## Practice project on Chapter 1; Employee Records System
+
+in this project you are required to design and build An Employee Records System, This time, you will end up with a fully functional C++ program that uses many of the features discussed in this chapter. This real-world example includes the use of classes, exceptions, streams, vectors, namespaces, references, and other language features. This program should be built against a database but it is out of the scope of this course so this part is removed. some concepts of software engineering are introduced for design and implement this project.
+
+the steps of creating this project are ordered by readme, for example first section of this chapter is in #1- Requirements elicitation and Project design.md readme and the cpp file associated with it.
