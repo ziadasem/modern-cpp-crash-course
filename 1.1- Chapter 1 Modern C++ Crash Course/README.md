@@ -1806,6 +1806,10 @@ using namespace NS;
 ```
 
 ### 18- Uniform Initialization
+the different types of initialization in C++:
+* Copy initialization `T object = other;`
+* Direct initialization `T object ( arg );`
+* and the Uniform initialization `type var_name{arg1, arg2, ....arg n};`
 
 Before C++11, the initialization of types was not always uniform. For example, the definitions of a structure, a class, and variables are different. the uniform initialization provides a consistent syntax for initializing different types of objects. in addition to that uniform initialization provides more advantages that will be discussed in this section:
 
